@@ -117,8 +117,8 @@
 
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0" HorizontalAlignment="Stretch" Text="{Binding Path=ItemNumber}"/>
-                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName}"/>
+                            <!--<TextBox Grid.Column="0" HorizontalAlignment="Stretch" Text="{Binding Path=ItemNumber}"/>-->
+                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding WellHeight}" />
                             <TextBox Grid.Column="3" HorizontalAlignment="Stretch" TextAlignment="Center"
@@ -126,7 +126,7 @@
                             <TextBox Grid.Column="4" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding WellDepth}" />
                             <TextBox Grid.Column="5" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding SoftEarthThickness}" />
+                                     Text="{Binding SoftEarthThickness}"/>
                             <TextBox Grid.Column="6" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding DestHardEarthThickness}"/>
                             <TextBox Grid.Column="7" HorizontalAlignment="Stretch" TextAlignment="Center"
@@ -134,11 +134,11 @@
                             <TextBox Grid.Column="8" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding TurfThickness}" />
                             <TextBox Grid.Column="9" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding GoldLayerThickness}"/>
+                                     Text="{Binding GoldLayerThickness, Mode=TwoWay}"/>
                             <TextBox Grid.Column="10" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding GoldLayerContentSlip}" />
+                                     Text="{Binding GoldLayerContentSlip, Mode=TwoWay}" />
                             <TextBox Grid.Column="11" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding VerticalGoldContent}" />
+                                     Text="{Binding VerticalGoldContent, Mode=TwoWay}" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

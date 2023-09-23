@@ -23,8 +23,9 @@ namespace WellCalculations2010.Model
         public string HorizontalScale { get; set; }
         public string VerticalScale { get; set; }
     }
+
     [Serializable]
-    public class Well
+    public class Well : ICloneable
     {
         public Well() 
         {
@@ -75,9 +76,42 @@ namespace WellCalculations2010.Model
         public string GoldLayerThickness { get; set; }
         public string GoldLayerContentSlip { get; set; }
         public string VerticalGoldContent { get; set; }
+
+        public object Clone()
+        {
+            Well clone = new Well();
+            clone.WellName = this.WellName;
+            clone.DistanceToNextWell = this.DistanceToNextWell;
+            clone.WellHeight = this.WellHeight;
+            clone.WellDepth = this.WellDepth;
+            clone.SoftEarthThickness = this.SoftEarthThickness;
+            clone.DestHardEarthThickness = this.DestHardEarthThickness;
+            clone.SolidHardEarthThickness= this.SolidHardEarthThickness;
+            clone.TurfThickness = this.TurfThickness;
+            clone.GoldLayerThickness = this.GoldLayerThickness;
+            clone.GoldLayerContentSlip = this.GoldLayerContentSlip;
+            clone.VerticalGoldContent = this.VerticalGoldContent;
+
+            ObservableCollection<GoldData> goldDatas = new ObservableCollection<GoldData>();
+            ObservableCollection<EarthData> earthDatas = new ObservableCollection<EarthData>();
+
+            foreach(GoldData goldData in this.GoldDatas)
+            {
+                goldDatas.Add((GoldData)goldData.Clone());
+            }
+            foreach (EarthData earthData in this.EarthDatas)
+            {
+                earthDatas.Add((EarthData)earthData.Clone());
+            }
+
+            clone.GoldDatas = goldDatas;
+            clone.EarthDatas = earthDatas;
+
+            return clone;
+        }
     }
     [Serializable]
-    public class GoldData
+    public class GoldData : ICloneable
     {
         public GoldData()
         {
@@ -91,9 +125,14 @@ namespace WellCalculations2010.Model
 
         public string goldContent { get; set; }
         public double goldHeight { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
     [Serializable]
-    public class EarthData
+    public class EarthData : ICloneable
     {
         public EarthData()
         {
@@ -107,5 +146,10 @@ namespace WellCalculations2010.Model
 
         public double earthHeight { get; set; }
         public string earthType { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

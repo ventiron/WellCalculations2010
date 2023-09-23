@@ -481,10 +481,14 @@ namespace WellCalculations2010.ViewModel
             {
                 return drawSegment == null ?
                     (drawSegment = new SimpleCommand(obj => {
-                        
-                        Section section = new Section(Wells.ToList());
-                        section.HorizontalScale = selectedHorScale;
-                        section.VerticalScale = selectedVertScale;
+                        List<Well> wells = new List<Well>();
+                        foreach(Well well in Wells)
+                        {
+                            wells.Add((Well)well.Clone());
+                        }
+                        Section section = new Section(wells);
+                        section.HorizontalScale = selectedHorScale.ToString();
+                        section.VerticalScale = selectedVertScale.ToString();
                         if (ValidateSection(section))
                         {
                             ((Window)obj).WindowState = WindowState.Minimized;
