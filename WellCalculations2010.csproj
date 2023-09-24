@@ -66,6 +66,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\IsOddConverter.cs" />
+    <Compile Include="Converter\RowNumberConverter.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="Model\Well.cs" />
     <Page Include="MainWindow.xaml">

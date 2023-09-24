@@ -360,7 +360,7 @@ namespace WellCalculations2010.ViewModel
                 return swapWellsUp == null ?
                     (swapWellsUp = new SimpleCommand(obj => {
                         int index = Wells.IndexOf(SelectedItem);
-                        if (index > 0)
+                        if (index > 0 && index != -1)
                         {
                             Wells.Insert(index - 1, SelectedItem);
                             Wells.RemoveAt(index + 1);
@@ -379,7 +379,7 @@ namespace WellCalculations2010.ViewModel
                 return swapWellsDown == null ?
                     (swapWellsDown = new SimpleCommand(obj => {
                         int index = Wells.IndexOf(SelectedItem);
-                        if (index < Wells.Count-1)
+                        if (index < Wells.Count-1 && index != -1)
                         {
                             Wells.Insert(index + 2, SelectedItem);
                             Wells.RemoveAt(index);

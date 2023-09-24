@@ -92,6 +92,20 @@ namespace TriangulationAutoCAD
 
             return text;
         }
+        public static MText CreateMtext(String content, Point3d location, byte color = 0, double textDistance = 0d, double textHeight = 0d, double rotation = 0, double lineSpacing = 0d, AttachmentPoint atPoint = AttachmentPoint.TopLeft)
+        {
+            MText text = new MText();
+            text.SetDatabaseDefaults();
+            text.Contents = content;
+            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
+            text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
+            text.Rotation = rotation;
+            text.ColorIndex = color <= 0 ? text.ColorIndex : color;
+            text.Attachment = atPoint;
+            text.LineSpaceDistance = lineSpacing;
+
+            return text;
+        }
         public static MText CreateMtext(String content, Point3d location, Color color, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();

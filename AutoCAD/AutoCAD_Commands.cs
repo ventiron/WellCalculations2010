@@ -32,8 +32,9 @@ namespace WellCalculations2010.AutoCAD
         private static double maxHeight;
 
         private static readonly double textHeight = 2.5;
-        private static readonly double tableRowMult = 1.671;
-        
+        private static readonly double tableRowMult = 2;
+        private static readonly double TextSpacing = textHeight * tableRowMult;
+
         private static double distFromScale = 20;
 
 
@@ -120,11 +121,11 @@ namespace WellCalculations2010.AutoCAD
                             new Point3d(basePoint.X + currentDist + distFromScale - 2, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0),
                             new Point3d(basePoint.X + currentDist + distFromScale + 2, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0)));
                         //Отрисовываем название и высоту скважины
-                        AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.WellName}\n\\O{well.WellHeight.ToString("{0.0}").Replace('.', ',')}"),
+                        AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.WellName}\n\\O{well.WellHeight.ToString("0.0").Replace('.', ',')}"),
                             new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight) + 10, 0),
                             0, 0, textHeight, 0, AttachmentPoint.MiddleCenter));
                         //Отрисовываем глубину скважины
-                        AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont(well.WellDepth.ToString("{0.0}").Replace('.', ',')),
+                        AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont(well.WellDepth.ToString("0.0").Replace('.', ',')),
                             new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth) - 10, 0),
                             0, 0, textHeight, 0, AttachmentPoint.TopCenter));
 
@@ -378,7 +379,7 @@ namespace WellCalculations2010.AutoCAD
                     //Название скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                             ApplyAutoCADFont($"{well.WellName}"),
-                            new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 0.15, 0),
+                            new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
                             0, 0, textHeight, 0, AttachmentPoint.TopCenter));
                     //Риска расстояния между скважинами
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
@@ -388,14 +389,14 @@ namespace WellCalculations2010.AutoCAD
                     if (i != section.Wells.Count - 1)
                     {
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
-                        ApplyAutoCADFont(well.DistanceToNextWell.ToString("{0.0}").Replace('.', ',')),
+                        ApplyAutoCADFont(well.DistanceToNextWell.ToString("0.0").Replace('.', ',')),
                         new Point3d(basePoint.X + currentDist + distFromScale + well.DistanceToNextWell / 2 / horScale,
-                        basePoint.Y - distFromTable - tableRowDist * 1.15, 0),
+                        basePoint.Y - distFromTable - tableRowDist * 1.20, 0),
                         0, 0, textHeight, 0, AttachmentPoint.TopCenter));
                     }
                     //Прочие табличные данные
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
-                        ApplyAutoCADFont($"{well.WellDepth.ToString("{0.0}").Replace('.', ',')}\n" +
+                        ApplyAutoCADFont($"{well.WellDepth.ToString("0.0").Replace('.', ',')}\n" +
                         $"{well.SoftEarthThickness}\n" +
                         $"{well.DestHardEarthThickness}\n" +
                         $"{well.SolidHardEarthThickness}\n" +
@@ -403,8 +404,8 @@ namespace WellCalculations2010.AutoCAD
                         $"{well.GoldLayerThickness}\n" +
                         $"{well.GoldLayerContentSlip}\n" +
                         $"{well.VerticalGoldContent}\n"),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2.15, 0),
-                        0, 0, textHeight, 0, AttachmentPoint.TopCenter));
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2.20, 0),
+                        0, 0, textHeight, 0, TextSpacing, AttachmentPoint.TopCenter));
 
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
@@ -431,8 +432,8 @@ namespace WellCalculations2010.AutoCAD
                     "Мощность песков\n" +
                     "Содержание на пласт\n" +
                     "Вертикальный запас"),
-                    new Point3d(basePoint.X - xTableOffset * 0.95, basePoint.Y - distFromTable - tableRowDist * 0.15, 0),
-                    0, 0, textHeight));
+                    new Point3d(basePoint.X - xTableOffset * 0.95, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
+                    0, 0, textHeight, 0, TextSpacing, AttachmentPoint.TopLeft));
                 //Отрисовываем единицы измерения легенды
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                     ApplyAutoCADFont("М\n" +
@@ -445,8 +446,8 @@ namespace WellCalculations2010.AutoCAD
                     "М\n" +
                     "г\\м{\\S2;}\n" +
                     "г\\м{\\S3;}\n"),
-                    new Point3d(basePoint.X + 1, basePoint.Y - distFromTable - tableRowDist * 0.15, 0),
-                    0, 0, textHeight));
+                    new Point3d(basePoint.X + 1, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
+                    0, 0, textHeight, 0, TextSpacing,  AttachmentPoint.TopCenter));
 
 
                 tr.Commit();
