@@ -162,9 +162,9 @@
                 <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="↓" FontSize="30" Command="{Binding SwapWellsDown}"/>
                 <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Content="-" FontSize="30" Command="{Binding DeleteWell}"/>
-                <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="30" Command="{Binding AddWell}"/>
+                <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Content="-" FontSize="30" Command="{Binding DeleteWell}"/>
             </Grid>
             
         </Grid>
