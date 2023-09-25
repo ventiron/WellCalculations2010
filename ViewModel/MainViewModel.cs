@@ -103,141 +103,141 @@ namespace WellCalculations2010.ViewModel
 
             Wells = new ObservableCollection<Well>
             {
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
-                new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>())
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>()),
+                //new Well(new ObservableCollection<GoldData>(), new ObservableCollection<EarthData>())
             };
-            Wells[0].WellName = "one";
-            Wells[0].WellHeight = 485.3;
-            Wells[0].WellDepth = 15;
-            Wells[0].DistanceToNextWell = 30;
-            Wells[0].GoldDatas.Add(new GoldData(10, "зн"));
-            Wells[0].EarthDatas.Add(new EarthData(3, "hello1"));
-            Wells[0].EarthDatas.Add(new EarthData(10, "hello"));
+            //Wells[0].WellName = "one";
+            //Wells[0].WellHeight = 485.3;
+            //Wells[0].WellDepth = 15;
+            //Wells[0].DistanceToNextWell = 30;
+            //Wells[0].GoldDatas.Add(new GoldData(10, "зн"));
+            //Wells[0].EarthDatas.Add(new EarthData(3, "hello1"));
+            //Wells[0].EarthDatas.Add(new EarthData(10, "hello"));
 
-            Wells[1].WellName = "two";
-            Wells[1].WellHeight = 482.6;
-            Wells[1].WellDepth = 10;
-            Wells[1].DistanceToNextWell = 40;
-            Wells[1].GoldDatas.Add(new GoldData(5, "6"));
-            Wells[1].EarthDatas.Add(new EarthData(3, "hello1"));
-            Wells[1].EarthDatas.Add(new EarthData(5, "hello"));
+            //Wells[1].WellName = "two";
+            //Wells[1].WellHeight = 482.6;
+            //Wells[1].WellDepth = 10;
+            //Wells[1].DistanceToNextWell = 40;
+            //Wells[1].GoldDatas.Add(new GoldData(5, "6"));
+            //Wells[1].EarthDatas.Add(new EarthData(3, "hello1"));
+            //Wells[1].EarthDatas.Add(new EarthData(5, "hello"));
 
-            Wells[2].WellName = "three";
-            Wells[2].WellHeight = 486.9;
-            Wells[2].WellDepth = 30;
-            Wells[2].DistanceToNextWell = 20;
-            Wells[2].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(17.2, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(17.4, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(17.6, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(17.8, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(18, "6"));
-            Wells[2].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[2].EarthDatas.Add(new EarthData(13, "hello1"));
-            Wells[2].EarthDatas.Add(new EarthData(18, "hello"));
+            //Wells[2].WellName = "three";
+            //Wells[2].WellHeight = 486.9;
+            //Wells[2].WellDepth = 30;
+            //Wells[2].DistanceToNextWell = 20;
+            //Wells[2].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(17.2, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(17.4, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(17.6, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(17.8, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(18, "6"));
+            //Wells[2].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[2].EarthDatas.Add(new EarthData(13, "hello1"));
+            //Wells[2].EarthDatas.Add(new EarthData(18, "hello"));
 
-            Wells[3].WellName = "four";
-            Wells[3].WellHeight = 482.9;
-            Wells[3].WellDepth = 30;
-            Wells[3].DistanceToNextWell = 40;
-            Wells[3].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[3].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[3].EarthDatas.Add(new EarthData(5, "hello1"));
-            Wells[3].EarthDatas.Add(new EarthData(8, "hello"));
+            //Wells[3].WellName = "four";
+            //Wells[3].WellHeight = 482.9;
+            //Wells[3].WellDepth = 30;
+            //Wells[3].DistanceToNextWell = 40;
+            //Wells[3].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[3].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[3].EarthDatas.Add(new EarthData(5, "hello1"));
+            //Wells[3].EarthDatas.Add(new EarthData(8, "hello"));
 
-            Wells[4].WellName = "five";
-            Wells[4].WellHeight = 485.9;
-            Wells[4].WellDepth = 35;
-            Wells[4].DistanceToNextWell = 30;
-            Wells[4].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[4].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[4].EarthDatas.Add(new EarthData(15, "hello1"));
-            Wells[4].EarthDatas.Add(new EarthData(17, "hello"));
+            //Wells[4].WellName = "five";
+            //Wells[4].WellHeight = 485.9;
+            //Wells[4].WellDepth = 35;
+            //Wells[4].DistanceToNextWell = 30;
+            //Wells[4].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[4].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[4].EarthDatas.Add(new EarthData(15, "hello1"));
+            //Wells[4].EarthDatas.Add(new EarthData(17, "hello"));
 
-            Wells[5].WellName = "six";
-            Wells[5].WellHeight = 487.3;
-            Wells[5].WellDepth = 28;
-            Wells[5].DistanceToNextWell = 20;
-            Wells[5].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[5].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[5].EarthDatas.Add(new EarthData(10, "hello1"));
-            Wells[5].EarthDatas.Add(new EarthData(12, "hello"));
+            //Wells[5].WellName = "six";
+            //Wells[5].WellHeight = 487.3;
+            //Wells[5].WellDepth = 28;
+            //Wells[5].DistanceToNextWell = 20;
+            //Wells[5].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[5].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[5].EarthDatas.Add(new EarthData(10, "hello1"));
+            //Wells[5].EarthDatas.Add(new EarthData(12, "hello"));
 
-            Wells[6].WellName = "seven";
-            Wells[6].WellHeight = 490.3;
-            Wells[6].WellDepth = 40;
-            Wells[6].DistanceToNextWell = 28;
-            Wells[6].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[6].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[6].EarthDatas.Add(new EarthData(15, "hello1"));
-            Wells[6].EarthDatas.Add(new EarthData(17, "hello"));
+            //Wells[6].WellName = "seven";
+            //Wells[6].WellHeight = 490.3;
+            //Wells[6].WellDepth = 40;
+            //Wells[6].DistanceToNextWell = 28;
+            //Wells[6].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[6].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[6].EarthDatas.Add(new EarthData(15, "hello1"));
+            //Wells[6].EarthDatas.Add(new EarthData(17, "hello"));
 
-            Wells[7].WellName = "eight";
-            Wells[7].WellHeight = 493.6;
-            Wells[7].WellDepth = 26;
-            Wells[7].DistanceToNextWell = 15;
-            Wells[7].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[7].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[7].EarthDatas.Add(new EarthData(18, "hello1"));
-            Wells[7].EarthDatas.Add(new EarthData(24, "hello"));
+            //Wells[7].WellName = "eight";
+            //Wells[7].WellHeight = 493.6;
+            //Wells[7].WellDepth = 26;
+            //Wells[7].DistanceToNextWell = 15;
+            //Wells[7].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[7].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[7].EarthDatas.Add(new EarthData(18, "hello1"));
+            //Wells[7].EarthDatas.Add(new EarthData(24, "hello"));
 
-            Wells[8].WellName = "nine";
-            Wells[8].WellHeight = 498.6;
-            Wells[8].WellDepth = 35;
-            Wells[8].DistanceToNextWell = 24;
-            Wells[8].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[8].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[8].EarthDatas.Add(new EarthData(18, "hello1"));
-            Wells[8].EarthDatas.Add(new EarthData(24, "hello"));
+            //Wells[8].WellName = "nine";
+            //Wells[8].WellHeight = 498.6;
+            //Wells[8].WellDepth = 35;
+            //Wells[8].DistanceToNextWell = 24;
+            //Wells[8].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[8].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[8].EarthDatas.Add(new EarthData(18, "hello1"));
+            //Wells[8].EarthDatas.Add(new EarthData(24, "hello"));
 
-            Wells[9].WellName = "ten";
-            Wells[9].WellHeight = 499.1;
-            Wells[9].WellDepth = 38;
-            Wells[9].DistanceToNextWell = 24;
-            Wells[9].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[9].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[9].EarthDatas.Add(new EarthData(20, "hello1"));
-            Wells[9].EarthDatas.Add(new EarthData(28, "hello"));
-            Wells[9].EarthDatas.Add(new EarthData(30, "single"));
+            //Wells[9].WellName = "ten";
+            //Wells[9].WellHeight = 499.1;
+            //Wells[9].WellDepth = 38;
+            //Wells[9].DistanceToNextWell = 24;
+            //Wells[9].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[9].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[9].EarthDatas.Add(new EarthData(20, "hello1"));
+            //Wells[9].EarthDatas.Add(new EarthData(28, "hello"));
+            //Wells[9].EarthDatas.Add(new EarthData(30, "single"));
 
-            Wells[10].WellName = "eleven";
-            Wells[10].WellHeight = 501;
-            Wells[10].WellDepth = 32;
-            Wells[10].DistanceToNextWell = 36;
-            Wells[10].GoldDatas.Add(new GoldData(17, "6"));
-            Wells[10].GoldDatas.Add(new GoldData(26, "6"));
-            Wells[10].EarthDatas.Add(new EarthData(20, "hello1"));
-            Wells[10].EarthDatas.Add(new EarthData(26, "hello"));
-            Wells[10].EarthDatas.Add(new EarthData(15, "break"));
-            Wells[10].EarthDatas.Add(new EarthData(5, "breakEnd"));
+            //Wells[10].WellName = "eleven";
+            //Wells[10].WellHeight = 501;
+            //Wells[10].WellDepth = 32;
+            //Wells[10].DistanceToNextWell = 36;
+            //Wells[10].GoldDatas.Add(new GoldData(17, "6"));
+            //Wells[10].GoldDatas.Add(new GoldData(26, "6"));
+            //Wells[10].EarthDatas.Add(new EarthData(20, "hello1"));
+            //Wells[10].EarthDatas.Add(new EarthData(26, "hello"));
+            //Wells[10].EarthDatas.Add(new EarthData(15, "break"));
+            //Wells[10].EarthDatas.Add(new EarthData(5, "breakEnd"));
 
-            Wells[11].WellName = "twelve";
-            Wells[11].WellHeight = 493.5;
-            Wells[11].WellDepth = 20;
-            Wells[11].DistanceToNextWell = 37;
-            Wells[11].EarthDatas.Add(new EarthData(15, "hello1"));
-            Wells[11].EarthDatas.Add(new EarthData(18, "hello"));
-            Wells[11].EarthDatas.Add(new EarthData(10, "break"));
-            Wells[11].EarthDatas.Add(new EarthData(3, "breakEnd"));
+            //Wells[11].WellName = "twelve";
+            //Wells[11].WellHeight = 493.5;
+            //Wells[11].WellDepth = 20;
+            //Wells[11].DistanceToNextWell = 37;
+            //Wells[11].EarthDatas.Add(new EarthData(15, "hello1"));
+            //Wells[11].EarthDatas.Add(new EarthData(18, "hello"));
+            //Wells[11].EarthDatas.Add(new EarthData(10, "break"));
+            //Wells[11].EarthDatas.Add(new EarthData(3, "breakEnd"));
 
-            Wells[12].WellName = "thirtheen";
-            Wells[12].WellHeight = 493.5;
-            Wells[12].WellDepth = 18;
-            Wells[12].DistanceToNextWell = 24;
-            Wells[12].EarthDatas.Add(new EarthData(12, "hello1"));
-            Wells[12].EarthDatas.Add(new EarthData(14, "hello"));
-            Wells[12].EarthDatas.Add(new EarthData(5, "breakEnd"));
+            //Wells[12].WellName = "thirtheen";
+            //Wells[12].WellHeight = 493.5;
+            //Wells[12].WellDepth = 18;
+            //Wells[12].DistanceToNextWell = 24;
+            //Wells[12].EarthDatas.Add(new EarthData(12, "hello1"));
+            //Wells[12].EarthDatas.Add(new EarthData(14, "hello"));
+            //Wells[12].EarthDatas.Add(new EarthData(5, "breakEnd"));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
