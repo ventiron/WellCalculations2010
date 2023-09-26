@@ -415,12 +415,14 @@ namespace WellCalculations2010.ViewModel
                             fileDialog.CheckPathExists = true;
                             if (fileDialog.ShowDialog() == true)
                             {
-                                using (FileStream fs = new FileStream(fileDialog.FileName, FileMode.OpenOrCreate))
+                                using (FileStream fs = new FileStream(fileDialog.FileName, FileMode.Create))
                                 {
                                     //string text = JsonConvert.SerializeObject(section);
                                     //fs.Write(Encoding.Default.GetBytes(text),0,0);
+                                    
                                     using (StreamWriter writer = new StreamWriter(fs, Encoding.GetEncoding(1251)))
                                     {
+                                        
                                         XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section));
                                         xmlSerializer.Serialize(writer, section);
                                     }

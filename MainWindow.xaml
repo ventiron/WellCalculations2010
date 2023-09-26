@@ -16,6 +16,7 @@
     <Window.Resources>
         <converter:RowNumberConverter x:Key="RowNumberConverter"/>
         <converter:IsOddConverter x:Key="IsOddConverter"/>
+        <converter:PlusOneConverter x:Key="PlusOneConverter"/>
 
         <Style  TargetType="{x:Type ListBoxItem}">
             <Style.Triggers>
@@ -122,7 +123,8 @@
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Padding="2"
-                                   Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex)}"/>
+                                   Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex),
+                                   Converter={StaticResource PlusOneConverter}}"/>
                             <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding WellHeight}" />

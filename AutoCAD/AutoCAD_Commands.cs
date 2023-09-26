@@ -272,33 +272,46 @@ namespace WellCalculations2010.AutoCAD
                             distForEarth += well.DistanceToNextWell / horScale;
                             for (int k = i + 1; k < section.Wells.Count; k++)
                             {
-                                for (int p = 0; p < section.Wells[k].EarthDatas.Count; p++)
+                                int index = -1;
+                                foreach(EarthData data in section.Wells[k].EarthDatas)
                                 {
-                                    EarthData nextEarthData = section.Wells[k].EarthDatas[p];
-                                    if (nextEarthData.earthType == earthData.earthType)
-                                    {
+                                    if (data.earthType == earthData.earthType) index = section.Wells[k].EarthDatas.IndexOf(data);
+                                }
+                                if (index != -1)
+                                {
+                                    EarthData nextEarthData = section.Wells[k].EarthDatas[index];
+
+                                    //При прерывании если находим в последующих скважинах нужную породу сначала добавляем точку посередине 2 скважин
+                                    if (earthSurface.Count == 0)
                                         earthSurface.Add(new Point3d(
-                                            basePoint.X + distFromScale + distForEarth,
+                                            basePoint.X + distFromScale + distForEarth - section.Wells[k - 1].DistanceToNextWell / horScale / 2,
                                             basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
-                                        if (k == section.Wells.Count - 1)
-                                            earthSurface.Add(new Point3d(
+                                    //Добавляем найденную точку в коллекцию точек поверхности
+                                    earthSurface.Add(new Point3d(
+                                        basePoint.X + distFromScale + distForEarth,
+                                        basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
+
+                                    if (k == section.Wells.Count - 1)
+                                        earthSurface.Add(new Point3d(
                                             basePoint.X + distFromScale * 1.5 + distForEarth,
                                             basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
-                                        break;
-                                    }
-                                    if (p == section.Wells[k].EarthDatas.Count - 1)
-                                    {
-                                        isInterrupted = true;
-
-                                        earthSurface.Add(new Point3d(
-                                            earthSurface[earthSurface.Count - 1].X + section.Wells[k - 1].DistanceToNextWell / horScale / 2,
-                                            earthSurface[earthSurface.Count - 1].Y, 0));
-                                        break;
-                                    }
-
                                 }
+                                else if (earthSurface.Count != 0)
+                                {
+                                    isInterrupted = true;
+
+                                    earthSurface.Add(new Point3d(
+                                        earthSurface[earthSurface.Count - 1].X + section.Wells[k - 1].DistanceToNextWell / horScale / 2,
+                                        earthSurface[earthSurface.Count - 1].Y, 0));
+                                }
+
                                 distForEarth += section.Wells[k].DistanceToNextWell / horScale;
-                                if (isInterrupted) break;
+                                if (isInterrupted && earthSurface.Count != 0)
+                                {
+                                    AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
+                                    earthSurface = new Point3dCollection();
+                                    isInterrupted = false;
+                                }
                             }
                             AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
                         }
@@ -322,6 +335,8 @@ namespace WellCalculations2010.AutoCAD
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
 
+            bool isThereNoSolidHardEarth = true;
+
             using (Transaction tr = bd.TransactionManager.StartTransaction())
             {
                 BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
@@ -344,6 +359,7 @@ namespace WellCalculations2010.AutoCAD
 
                     if (double.TryParse(solidEarthTemp, out solidEarth))
                     {
+                        isThereNoSolidHardEarth = false;
                         if (solidEarthPoints.Count == 0)
                         {
                             if (i == 0)
@@ -494,8 +510,46 @@ namespace WellCalculations2010.AutoCAD
                         VerticalAtEnd.Erase();
                     }
                 }
+                if ((destEarthPoints.Count == section.Wells.Count + 2) && isThereNoSolidHardEarth)
+                {
+                    Point3dCollection destEarthSecondPoints = new Point3dCollection();
+                    foreach (Point3d point in destEarthPoints)
+                    {
+                        destEarthSecondPoints.Add(new Point3d(point.X, point.Y - 40, point.Z));
+                    }
+                    Spline destEarthSecondSurface = new Spline(destEarthSecondPoints, 5, 0.0);
+                    Line VerticalAtStart = AutoInitial.CreateLine(destEarthPoints[0], destEarthSecondPoints[0]);
+                    Line VerticalAtEnd = AutoInitial.CreateLine(destEarthPoints[destEarthPoints.Count - 1], destEarthSecondPoints[destEarthSecondPoints.Count - 1]);
 
-                doc.Editor.UpdateScreen();
+                    AutoInitial.Initialize(tr, btr, destEarthSecondSurface);
+                    AutoInitial.Initialize(tr, btr, VerticalAtStart);
+                    AutoInitial.Initialize(tr, btr, VerticalAtEnd);
+
+                    //MessageBox.Show("I'm Here");
+                    ObjectIdCollection ObjIds = new ObjectIdCollection()
+                    {
+                    destEarthSurface.Id,
+                    destEarthSecondSurface.Id,
+                    VerticalAtStart.Id,
+                    VerticalAtEnd.Id
+                    };
+
+                    Hatch oHatch = new Hatch();
+                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
+                    AutoInitial.Initialize(tr, btr, oHatch);
+
+                    oHatch.Associative = false;
+                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
+                    oHatch.EvaluateHatch(true);
+
+                    oHatch.PatternScale = 4;
+                    oHatch.SetHatchPattern(oHatch.PatternType, oHatch.PatternName);
+
+                    VerticalAtStart.Erase();
+                    VerticalAtEnd.Erase();
+                    destEarthSecondSurface.Erase();
+                }
+                    doc.Editor.UpdateScreen();
                 tr.Commit();
             }
         }
