@@ -516,11 +516,10 @@ namespace WellCalculations2010.ViewModel
             List<double> data = new List<double>();
             foreach(GoldData goldData in well.GoldDatas)
             {
-                if(goldData.goldHeight > well.WellDepth || goldData.goldHeight < 0 || data.Contains(goldData.goldHeight))
+                if(goldData.goldHeight > well.WellDepth || goldData.goldHeight < 0)
                 {
                     return false;
                 }
-                data.Add(goldData.goldHeight);
             }
             return true;
         }

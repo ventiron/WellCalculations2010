@@ -8,9 +8,11 @@ using Autodesk.Private.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.OleDb;
 using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -32,6 +34,8 @@ namespace WellCalculations2010.AutoCAD
         private static double minHeight;
         private static double maxHeight;
 
+        private static readonly int InterpolatedPointsNumber = 1;
+        private static readonly double VertScaleWidth = 1;
         private static readonly double textHeight = 2.5;
         private static readonly double tableRowMult = 2;
         private static readonly double TextSpacing = textHeight * tableRowMult;
@@ -114,7 +118,8 @@ namespace WellCalculations2010.AutoCAD
 
                 //Основной цикл отрисовки
                 double currentDist = 0;
-                Point3dCollection surface = new Point3dCollection();
+                List<Point3d> InterpolatedPoints = new List<Point3d>();
+                Point3dCollection surfacePoints = new Point3dCollection();
                 for (int i = 0; i < section.Wells.Count; i++)
                 {
                     Well well = section.Wells[i];
@@ -122,36 +127,46 @@ namespace WellCalculations2010.AutoCAD
                     // Первая точка сплайна поверхности
                     if (i == 0)
                     {
-                        surface.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                        surfacePoints.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
                     }
 
                     //Отрисовываем скважину
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight), 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0)));
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0), 0, LineWeight.LineWeight015));
                     //Отрисовываем нижнюю риску скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
-                        new Point3d(basePoint.X + currentDist + distFromScale - 2, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale + 2, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0)));
+                        new Point3d(basePoint.X + currentDist + distFromScale - 1, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0),
+                        new Point3d(basePoint.X + currentDist + distFromScale + 1, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0)));
                     //Отрисовываем название и высоту скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.WellName}\n\\O{well.WellHeight.ToString("0.0").Replace('.', ',')}"),
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight) + 10, 0),
                         0, 0, textHeight, 0, AttachmentPoint.MiddleCenter));
                     //Отрисовываем глубину скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont(well.WellDepth.ToString("0.0").Replace('.', ',')),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth) - 10, 0),
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth) - 5, 0),
                         0, 0, textHeight, 0, AttachmentPoint.TopCenter));
 
 
                     //Отрисовываем сплайн поверхности
-                    surface.Add(new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                    InterpolateAndAddPoint(surfacePoints,new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
                     if (i == section.Wells.Count - 1)
-                        surface.Add(new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                        InterpolateAndAddPoint(surfacePoints,new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
                     //Увеличиваем расстояние до скважины
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
                 }
-                AutoInitial.Initialize(tr, btr, new Spline(surface, 5, 0.0));
+                Spline surface = new Spline(surfacePoints, 5, 0.0);
+                surface.ColorIndex = 42;
+                surface.LineWeight = LineWeight.LineWeight015;
+                AutoInitial.Initialize(tr, btr, surface);
+
+                Spline surfaceTemp = CreateSplineCopyByY(surface, 2);
+                AutoInitial.Initialize(tr, btr, surfaceTemp);
+                HatchTwoSplines(surface, surfaceTemp, "EARTH", 0.4, 40);
+                surfaceTemp.Erase();
+
+
 
                 tr.Commit();
             }
@@ -192,7 +207,7 @@ namespace WellCalculations2010.AutoCAD
                         //Отрисовываем надпись высоты нижней риски содержания
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                             ApplyAutoCADFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.',',')}"),
-                            new Point3d(basePoint.X + currentDist + distFromScale - 3, bottomHeight, 0),
+                            new Point3d(basePoint.X + currentDist + distFromScale - 1, bottomHeight, 0),
                             0, 0, goldContentDepthTextHeight, 0, AttachmentPoint.MiddleRight));
 
                         //Отрисовываем верхнюю риску содержания при нужде
@@ -206,7 +221,7 @@ namespace WellCalculations2010.AutoCAD
                             //Отрисовываем надпись высоты верхней риски содержания
                             AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                                 ApplyAutoCADFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
-                                new Point3d(basePoint.X + currentDist + distFromScale - 3, topHeight, 0),
+                                new Point3d(basePoint.X + currentDist + distFromScale - 1, topHeight, 0),
                                 0, 0, goldContentDepthTextHeight, 0, AttachmentPoint.MiddleRight));
                         }
 
@@ -241,6 +256,7 @@ namespace WellCalculations2010.AutoCAD
                 BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
                 BlockTableRecord btr = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
 
+                List<Point3d> InterpolatedPoints = new List<Point3d>();
                 List<String> earthDatas = new List<String>();
                 double currentDist = 0;
 
@@ -265,7 +281,7 @@ namespace WellCalculations2010.AutoCAD
                                     basePoint.X + distFromScale + distForEarth - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                     basePoint.Y + GetHeightDifference(well.WellHeight - earthData.earthHeight), 0));
                             //Отрисовываем первую точку в первой скважине
-                            earthSurface.Add(new Point3d(
+                            InterpolateAndAddPoint(earthSurface, new Point3d(
                                     basePoint.X + distFromScale + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeight - earthData.earthHeight), 0));
 
                             bool isInterrupted = false;
@@ -287,12 +303,12 @@ namespace WellCalculations2010.AutoCAD
                                             basePoint.X + distFromScale + distForEarth - section.Wells[k - 1].DistanceToNextWell / horScale / 2,
                                             basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
                                     //Добавляем найденную точку в коллекцию точек поверхности
-                                    earthSurface.Add(new Point3d(
+                                    InterpolateAndAddPoint(earthSurface, new Point3d(
                                         basePoint.X + distFromScale + distForEarth,
                                         basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
 
                                     if (k == section.Wells.Count - 1)
-                                        earthSurface.Add(new Point3d(
+                                        InterpolateAndAddPoint(earthSurface, new Point3d(
                                             basePoint.X + distFromScale * 1.5 + distForEarth,
                                             basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
                                 }
@@ -300,7 +316,7 @@ namespace WellCalculations2010.AutoCAD
                                 {
                                     isInterrupted = true;
 
-                                    earthSurface.Add(new Point3d(
+                                    InterpolateAndAddPoint(earthSurface, new Point3d(
                                         earthSurface[earthSurface.Count - 1].X + section.Wells[k - 1].DistanceToNextWell / horScale / 2,
                                         earthSurface[earthSurface.Count - 1].Y, 0));
                                 }
@@ -373,19 +389,19 @@ namespace WellCalculations2010.AutoCAD
                                     basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                     basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
                         }
-                        solidEarthPoints.Add(new Point3d(
+                        InterpolateAndAddPoint(solidEarthPoints,new Point3d(
                                         basePoint.X + distFromScale + currentDist,
                                         basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
                         if (i == section.Wells.Count - 1)
                         {
-                            solidEarthPoints.Add(new Point3d(
+                            InterpolateAndAddPoint(solidEarthPoints, new Point3d(
                                         basePoint.X + distFromScale * 1.5 + currentDist,
                                         basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
                         }
                     }
                     else if (solidEarthPoints.Count != 0)
                     {
-                        solidEarthPoints.Add(new Point3d(
+                        InterpolateAndAddPoint(solidEarthPoints, new Point3d(
                                             solidEarthPoints[solidEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                             solidEarthPoints[solidEarthPoints.Count - 1].Y, 0));
                         AutoInitial.Initialize(tr, btr, new Spline(solidEarthPoints, 5, 0.0));
@@ -408,22 +424,24 @@ namespace WellCalculations2010.AutoCAD
                                     basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                     basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
                         }
-                        destEarthPoints.Add(new Point3d(
+                        InterpolateAndAddPoint(destEarthPoints, new Point3d(
                                         basePoint.X + distFromScale + currentDist,
                                         basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
                         if (i == section.Wells.Count - 1)
                         {
-                            destEarthPoints.Add(new Point3d(
+                            InterpolateAndAddPoint(destEarthPoints,new Point3d(
                                         basePoint.X + distFromScale * 1.5 + currentDist,
                                         basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
                         }
                     }
                     else if (destEarthPoints.Count != 0)
                     {
-                        destEarthPoints.Add(new Point3d(
+                        InterpolateAndAddPoint(destEarthPoints, new Point3d(
                                             destEarthPoints[destEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                             destEarthPoints[destEarthPoints.Count - 1].Y, 0));
-                        AutoInitial.Initialize(tr, btr, new Spline(destEarthPoints, 5, 0.0));
+                        Spline destEarthSurf = new Spline(destEarthPoints, 5, 0.0);
+                        destEarthSurf.LineWeight = LineWeight.LineWeight015;
+                        AutoInitial.Initialize(tr, btr, destEarthSurf);
                         destEarthPoints = new Point3dCollection();
                     }
 
@@ -432,124 +450,32 @@ namespace WellCalculations2010.AutoCAD
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
                 }
+
                 Spline solidEarthSurface = new Spline(solidEarthPoints, 5, 0.0);
                 Spline destEarthSurface = new Spline(destEarthPoints, 5, 0.0);
+                destEarthSurface.LineWeight = LineWeight.LineWeight015;
                 AutoInitial.Initialize(tr, btr, destEarthSurface);
                 AutoInitial.Initialize(tr, btr, solidEarthSurface);
 
-                if (solidEarthPoints.Count == section.Wells.Count + 2)
+                if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1)
                 {
-                   
-                    Point3dCollection SolidEarthSecondPoints = new Point3dCollection();
-                    foreach (Point3d point in solidEarthPoints)
-                    {
-                        SolidEarthSecondPoints.Add(new Point3d(point.X, point.Y - 40, point.Z));
-                    }
-                    Spline solidEarthSecondSurface = new Spline(SolidEarthSecondPoints, 5, 0.0);
-                    Line VerticalAtStart = AutoInitial.CreateLine(solidEarthPoints[0], SolidEarthSecondPoints[0]);
-                    Line VerticalAtEnd = AutoInitial.CreateLine(solidEarthPoints[solidEarthPoints.Count - 1], SolidEarthSecondPoints[SolidEarthSecondPoints.Count - 1]);
-
-                    AutoInitial.Initialize(tr, btr, solidEarthSecondSurface);
-                    AutoInitial.Initialize(tr, btr, VerticalAtStart);
-                    AutoInitial.Initialize(tr, btr, VerticalAtEnd);
-
-                    //MessageBox.Show("I'm Here");
-                    ObjectIdCollection ObjIds = new ObjectIdCollection()
-                    {
-                    solidEarthSurface.Id,
-                    solidEarthSecondSurface.Id,
-                    VerticalAtStart.Id,
-                    VerticalAtEnd.Id
-                    };
-
-                    Hatch oHatch = new Hatch();
-                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
-                    AutoInitial.Initialize(tr, btr, oHatch);
-
-                    oHatch.Associative = false;
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
-                    oHatch.EvaluateHatch(true);
-
-                    oHatch.PatternScale = 4;
-                    oHatch.SetHatchPattern(oHatch.PatternType, oHatch.PatternName);
-
-                    VerticalAtStart.Erase();
-                    VerticalAtEnd.Erase();
-                    solidEarthSecondSurface.Erase();
+                    Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, 40);
+                    AutoInitial.Initialize(tr, btr, tempSolidSpline);
+                    HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 4);
+                    tempSolidSpline.Erase();
 
                     if (solidEarthPoints.Count == destEarthPoints.Count)
                     {
-                        VerticalAtStart = AutoInitial.CreateLine(solidEarthPoints[0], destEarthPoints[0]);
-                        VerticalAtEnd = AutoInitial.CreateLine(solidEarthPoints[solidEarthPoints.Count - 1], destEarthPoints[destEarthPoints.Count - 1]);
-
-                        AutoInitial.Initialize(tr, btr, VerticalAtStart);
-                        AutoInitial.Initialize(tr, btr, VerticalAtEnd);
-
-                        ObjIds = new ObjectIdCollection()
-                        {
-                            solidEarthSurface.Id,
-                            destEarthSurface.Id,
-                            VerticalAtStart.Id,
-                            VerticalAtEnd.Id
-                        };
-
-                        oHatch = new Hatch();
-                        oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
-                        AutoInitial.Initialize(tr, btr, oHatch);
-
-                        oHatch.Associative = false;
-                        oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
-                        oHatch.EvaluateHatch(true);
-
-                        oHatch.PatternScale = 2;
-                        oHatch.SetHatchPattern(oHatch.PatternType, oHatch.PatternName);
-
-                        
-
-                        VerticalAtStart.Erase();
-                        VerticalAtEnd.Erase();
+                        HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 2);
                     }
                 }
-                if ((destEarthPoints.Count == section.Wells.Count + 2) && isThereNoSolidHardEarth)
+                if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && isThereNoSolidHardEarth)
                 {
-                    Point3dCollection destEarthSecondPoints = new Point3dCollection();
-                    foreach (Point3d point in destEarthPoints)
-                    {
-                        destEarthSecondPoints.Add(new Point3d(point.X, point.Y - 40, point.Z));
-                    }
-                    Spline destEarthSecondSurface = new Spline(destEarthSecondPoints, 5, 0.0);
-                    Line VerticalAtStart = AutoInitial.CreateLine(destEarthPoints[0], destEarthSecondPoints[0]);
-                    Line VerticalAtEnd = AutoInitial.CreateLine(destEarthPoints[destEarthPoints.Count - 1], destEarthSecondPoints[destEarthSecondPoints.Count - 1]);
-
-                    AutoInitial.Initialize(tr, btr, destEarthSecondSurface);
-                    AutoInitial.Initialize(tr, btr, VerticalAtStart);
-                    AutoInitial.Initialize(tr, btr, VerticalAtEnd);
-
-                    //MessageBox.Show("I'm Here");
-                    ObjectIdCollection ObjIds = new ObjectIdCollection()
-                    {
-                    destEarthSurface.Id,
-                    destEarthSecondSurface.Id,
-                    VerticalAtStart.Id,
-                    VerticalAtEnd.Id
-                    };
-
-                    Hatch oHatch = new Hatch();
-                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
-                    AutoInitial.Initialize(tr, btr, oHatch);
-
-                    oHatch.Associative = false;
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
-                    oHatch.EvaluateHatch(true);
-
-                    oHatch.PatternScale = 4;
-                    oHatch.SetHatchPattern(oHatch.PatternType, oHatch.PatternName);
-
-                    VerticalAtStart.Erase();
-                    VerticalAtEnd.Erase();
-                    destEarthSecondSurface.Erase();
+                    Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, 40);
+                    AutoInitial.Initialize(tr, btr, tempDestSpline);
+                    HatchTwoSplines(destEarthSurface, tempDestSpline, "ANSI31" , 2);
+                    tempDestSpline.Erase();
                 }
-                    doc.Editor.UpdateScreen();
                 tr.Commit();
             }
         }
@@ -647,8 +573,8 @@ namespace WellCalculations2010.AutoCAD
                     "м\n" +
                     "м\n" +
                     "м\n" +
-                    "г\\м{\\S2;}\n" +
-                    "г\\м{\\S3;}\n"),
+                    "г\\м²\n" +
+                    "г\\м³\n"),
                     new Point3d(basePoint.X + 1, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
                     0, 0, textHeight, 0, TextSpacing,  AttachmentPoint.TopCenter));
 
@@ -677,8 +603,8 @@ namespace WellCalculations2010.AutoCAD
                     Polyline poly = new Polyline();
                     poly.AddVertexAt(0, new Point2d(basePoint.X, basePoint.Y + 10 * i), 0.0, -1.0, -1.0);
                     poly.AddVertexAt(1, new Point2d(basePoint.X, basePoint.Y + 10 * (i + 1)), 0.0, -1.0, -1.0);
-                    poly.AddVertexAt(2, new Point2d(basePoint.X + 2, basePoint.Y + 10 * (i + 1)), 0.0, -1.0, -1.0);
-                    poly.AddVertexAt(3, new Point2d(basePoint.X + 2, basePoint.Y + 10 * i), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(2, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + 10 * (i + 1)), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(3, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + 10 * i), 0.0, -1.0, -1.0);
                     poly.Closed = true;
 
                     AutoInitial.Initialize(tr, btr, poly);
@@ -704,7 +630,7 @@ namespace WellCalculations2010.AutoCAD
                     if (((minHeight + vertScaleStep * i) % (vertScaleStep * 5.0)) == 0.0)
                     {
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{minHeight + vertScaleStep * i}"),
-                            new Point3d(basePoint.X - 15, basePoint.Y + 10 * i, 0), 0, 0, textHeight, 0, AttachmentPoint.MiddleLeft));
+                            new Point3d(basePoint.X - 5, basePoint.Y + 10 * i, 0), 0, 0, textHeight, 0, AttachmentPoint.MiddleRight));
                     }
                 }
                 tr.Commit();
@@ -714,6 +640,76 @@ namespace WellCalculations2010.AutoCAD
 
 
 
+
+        private static void HatchTwoSplines(Spline firstSpline, Spline secondSpline, string hatchType, double hatchScale = 1, double rotationAngle = 0)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+
+            using (Transaction tr = doc.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+                Point3dCollection firstSplinePoints = new Point3dCollection();
+                Point3dCollection secondSplinePoints = new Point3dCollection();
+                for (int i = 0; i < firstSpline.NumFitPoints; i++)
+                {
+                    firstSplinePoints.Add(firstSpline.GetFitPointAt(i));
+                }
+                for (int i = 0; i < secondSpline.NumFitPoints; i++)
+                {
+                    secondSplinePoints.Add(secondSpline.GetFitPointAt(i));
+                }
+
+                Line VerticalAtStart = AutoInitial.CreateLine(firstSplinePoints[0], secondSplinePoints[0]);
+                Line VerticalAtEnd = AutoInitial.CreateLine(firstSplinePoints[firstSplinePoints.Count - 1], secondSplinePoints[secondSplinePoints.Count - 1]);
+
+                AutoInitial.Initialize(tr, btr, VerticalAtStart);
+                AutoInitial.Initialize(tr, btr, VerticalAtEnd);
+
+                ObjectIdCollection ObjIds = new ObjectIdCollection()
+                { 
+                    firstSpline.Id,
+                    secondSpline.Id,
+                    VerticalAtStart.Id,
+                    VerticalAtEnd.Id
+                };
+
+                Hatch oHatch = new Hatch();
+                oHatch.SetHatchPattern(HatchPatternType.PreDefined, hatchType);
+                AutoInitial.Initialize(tr, btr, oHatch);
+
+                oHatch.Associative = false;
+                oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
+                oHatch.EvaluateHatch(true);
+
+                oHatch.PatternScale = hatchScale;
+                oHatch.PatternAngle = rotationAngle * Math.PI / 180.0;
+                oHatch.SetHatchPattern(oHatch.PatternType, oHatch.PatternName);
+
+
+                VerticalAtStart.Erase();
+                VerticalAtEnd.Erase();
+
+                tr.Commit();
+            }
+        }
+
+        private static Spline CreateSplineCopyByY(Spline source, double distance)
+        {
+            Point3dCollection firstSplinePoints = new Point3dCollection();
+            Point3dCollection secondSplinePoints = new Point3dCollection();
+            for (int i = 0; i < source.NumFitPoints; i++)
+            {
+                firstSplinePoints.Add(source.GetFitPointAt(i));
+            }
+            foreach (Point3d point in firstSplinePoints)
+            {
+                secondSplinePoints.Add(new Point3d(point.X, point.Y - distance, point.Z));
+            }
+            return new Spline(secondSplinePoints, 5, 0.0);
+        }
 
 
         //Рассчетные и служебные методы
@@ -781,7 +777,7 @@ namespace WellCalculations2010.AutoCAD
                 well.SolidHardEarthThickness = well.SolidHardEarthThickness.Trim().Replace(',', '.');
                 well.TurfThickness = well.TurfThickness.Trim().Replace(',', '.');
                 well.GoldLayerThickness = well.GoldLayerThickness.Trim().Replace(',', '.');
-                well.GoldLayerContentSlip = well.GoldLayerContentSlip.Trim().Replace('.', ',');
+                well.GoldLayerContentSlip = well.GoldLayerContentSlip.Trim().Replace(',', '.');
                 well.VerticalGoldContent = well.VerticalGoldContent.Trim().Replace(',', '.');
 
                 if (double.TryParse(well.SoftEarthThickness,out double softEarthThickness))
@@ -810,7 +806,7 @@ namespace WellCalculations2010.AutoCAD
                 }
                 if (double.TryParse(well.VerticalGoldContent, out double verticalGoldContent))
                 {
-                    well.VerticalGoldContent = verticalGoldContent.ToString("0.0").Replace('.', ',');
+                    well.VerticalGoldContent = verticalGoldContent.ToString("0.000").Replace('.', ',');
                 }
 
                 foreach(GoldData goldData in well.GoldDatas)
@@ -821,6 +817,31 @@ namespace WellCalculations2010.AutoCAD
                     }
                 }
             }
+        }
+        private static List<Point3d> InterpolateBetweenPoints(Point3d firstPoint, Point3d secondPoint, int numberOfPoints)
+        {
+            List<Point3d> result = new List<Point3d>();
+            double dist = Math.Sqrt(Math.Pow(secondPoint.X - firstPoint.X,2) + Math.Pow(firstPoint.Y - secondPoint.Y,2));
+            
+            double dX = (secondPoint.X - firstPoint.X) / dist;
+            double dY = (secondPoint.Y - firstPoint.Y) / dist;
+
+            dist = dist / (numberOfPoints + 1);
+
+            for (int i = 1; i <= numberOfPoints; i++)
+            {
+                result.Add(new Point3d(firstPoint.X + dX * dist * i, firstPoint.Y + dY * dist * i, 0));
+            }
+            return result;
+        }
+        private static void InterpolateAndAddPoint(Point3dCollection points, Point3d point)
+        {
+            List<Point3d> InterpolatedPoints = InterpolateBetweenPoints(points[points.Count - 1], point, InterpolatedPointsNumber);
+
+            foreach (Point3d Interpoint in InterpolatedPoints)
+                points.Add(Interpoint);
+            
+            points.Add(point);
         }
 
 

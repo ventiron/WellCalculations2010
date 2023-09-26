@@ -23,11 +23,12 @@ namespace TriangulationAutoCAD
     {
         // Функции для автоматической инициализации объектов в AutoCAD
         // НЕ ОТРИСОВЫВАЮТ, НЕ ЗАНОСЯТ В БАЗЫ ДАННЫХ, ТОЛЬКО ИНИЦИАЛИЗИРУЮТ
-        public static Line CreateLine(Point3d firstPoint, Point3d secondPoint, byte color = 0)
+        public static Line CreateLine(Point3d firstPoint, Point3d secondPoint, byte color = 0, LineWeight lineWeight = LineWeight.ByLayer)
         {
             Line line = new Line(firstPoint, secondPoint);
             line.SetDatabaseDefaults();
             line.ColorIndex = color <= 0 ? line.ColorIndex : color;
+            line.LineWeight = lineWeight;
 
             return line;
 

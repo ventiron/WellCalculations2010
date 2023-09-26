@@ -33,239 +33,247 @@
             <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Control}, AncestorLevel=1}}"/>
         </Style>
     </Window.Resources>
+    
+    
+    <TabControl>
+        <TabItem Header="Данные по скважинам">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition Height="50"/>
-        </Grid.RowDefinitions>
-
-        <!--Выбор горизонтального и вертикального масштабов-->
-        <Label Grid.Row="0" Grid.Column="0" Content="Горизонтальный масштаб" Grid.ColumnSpan="2" Margin="10,0,390,0"/>
-        <ComboBox Grid.Row="0" Grid.Column="0" 
+                <!--Выбор горизонтального и вертикального масштабов-->
+                <Label Grid.Row="0" Grid.Column="0" Content="Горизонтальный масштаб" Grid.ColumnSpan="2" Margin="10,0,390,0"/>
+                <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedHorScale}"/>
-        <Label Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Content="Вертикальный масштаб"/>
-        <ComboBox Grid.Row="0" Grid.Column="0" 
+                <Label Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Content="Вертикальный масштаб"/>
+                <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="200,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedVertScale}"/>
 
-        <!--Выбор скважин-->
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+                <!--Выбор скважин-->
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-            <!--Подписи к столбцам скважин-->
-            <Grid Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="35"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="20"/>
-                </Grid.ColumnDefinitions>
-                
-                <Label Grid.Column="1" HorizontalAlignment="Center" Content="№ скв."/>
-                <Label Grid.Column="2" HorizontalAlignment="Center" Content="H скв."/>
-                <Label Grid.Column="3" HorizontalAlignment="Center" Content="S до след."/>
-                <Label Grid.Column="4" HorizontalAlignment="Center" Content="Гл. скв."/>
-                <Label Grid.Column="5" HorizontalAlignment="Center" Content="Наносы"/>
-                <Label Grid.Column="6" HorizontalAlignment="Center" Content="Раз.Кор."/>
-                <Label Grid.Column="7" HorizontalAlignment="Center" Content="Плот.Кор."/>
-                <Label Grid.Column="8" HorizontalAlignment="Center" Content="Торфа"/>
-                <Label Grid.Column="9" HorizontalAlignment="Center" Content="Пески"/>
-                <Label Grid.Column="10" HorizontalAlignment="Center" Content="Сред.Сод."/>
-                <Label Grid.Column="11" HorizontalAlignment="Center" Content="Верт.Зап."/>
-            </Grid>
-            <!--Основные данные по скважинам-->
-            <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding Wells.Count}"
+                    <!--Подписи к столбцам скважин-->
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="1" HorizontalAlignment="Center" Content="№ скв."/>
+                        <Label Grid.Column="2" HorizontalAlignment="Center" Content="H скв."/>
+                        <Label Grid.Column="3" HorizontalAlignment="Center" Content="S до след."/>
+                        <Label Grid.Column="4" HorizontalAlignment="Center" Content="Гл. скв."/>
+                        <Label Grid.Column="5" HorizontalAlignment="Center" Content="Наносы"/>
+                        <Label Grid.Column="6" HorizontalAlignment="Center" Content="Раз.Кор."/>
+                        <Label Grid.Column="7" HorizontalAlignment="Center" Content="Плот.Кор."/>
+                        <Label Grid.Column="8" HorizontalAlignment="Center" Content="Торфа"/>
+                        <Label Grid.Column="9" HorizontalAlignment="Center" Content="Пески"/>
+                        <Label Grid.Column="10" HorizontalAlignment="Center" Content="Сред.Сод."/>
+                        <Label Grid.Column="11" HorizontalAlignment="Center" Content="Верт.Зап."/>
+                    </Grid>
+                    <!--Основные данные по скважинам-->
+                    <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding Wells.Count}"
                      ItemsSource="{Binding Wells}" SelectedIndex="0" SelectedItem="{Binding SelectedItem}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="21"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="21"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
 
-                            </Grid.ColumnDefinitions>
+                                    </Grid.ColumnDefinitions>
 
-                            <Label Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Padding="2"
+                                    <Label Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Padding="2"
                                    Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex),
                                    Converter={StaticResource PlusOneConverter}}"/>
-                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
-                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
+                                    <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding WellHeight}" />
-                            <TextBox Grid.Column="3" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="3" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding DistanceToNextWell}"/>
-                            <TextBox Grid.Column="4" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="4" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding WellDepth}" />
-                            <TextBox Grid.Column="5" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="5" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding SoftEarthThickness}"/>
-                            <TextBox Grid.Column="6" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="6" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding DestHardEarthThickness}"/>
-                            <TextBox Grid.Column="7" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="7" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding SolidHardEarthThickness}" />
-                            <TextBox Grid.Column="8" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="8" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding TurfThickness}" />
-                            <TextBox Grid.Column="9" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="9" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding GoldLayerThickness, Mode=TwoWay}"/>
-                            <TextBox Grid.Column="10" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="10" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding GoldLayerContentSlip, Mode=TwoWay}" />
-                            <TextBox Grid.Column="11" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                    <TextBox Grid.Column="11" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Text="{Binding VerticalGoldContent, Mode=TwoWay}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-            <!--Кнопки для управления основным датагридом-->
-            <Grid Grid.Row="1" Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <!--Кнопки для управления основным датагридом-->
+                    <Grid Grid.Row="1" Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="↑" FontSize="30" Command="{Binding SwapWellsUp}"/>
-                <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="↓" FontSize="30" Command="{Binding SwapWellsDown}"/>
-                <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="30" Command="{Binding AddWell}"/>
-                <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="-" FontSize="30" Command="{Binding DeleteWell}"/>
-            </Grid>
-            
-        </Grid>
+                    </Grid>
 
-        <!--Данные по золоту-->
-        <Grid Grid.Row="2" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition/>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
-            
-            <!--Подписи к таблице по породам-->
-            <Grid Grid.Row="0" Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                
-                <Label Grid.Column="1" HorizontalAlignment="Center" Content="Содержание золота в пробе"/>
-                <Label Grid.Column="2" HorizontalAlignment="Center" Content="Глубина пробы"/>
-            </Grid>
+                </Grid>
 
-            <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
+                <!--Данные по золоту-->
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+
+                    <!--Подписи к таблице по породам-->
+                    <Grid Grid.Row="0" Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="1" HorizontalAlignment="Center" Content="Содержание золота в пробе"/>
+                        <Label Grid.Column="2" HorizontalAlignment="Center" Content="Глубина пробы"/>
+                    </Grid>
+
+                    <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
                      ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedGoldData}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="20"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"/>
-                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"/>
+                                    <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="20" Command="{Binding AddGoldData}"/>
-            <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="-" FontSize="20" Command="{Binding DeleteGoldData}"/>
-        </Grid>
+                </Grid>
 
-        <!--Данные по породам-->
-        <Grid Grid.Row="2" Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition/>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
-            <!--Подписи к таблице по породам-->
-            <Grid Grid.Row="0" Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Label Grid.Column="1" HorizontalAlignment="Center" Content="Тип (тег) породы"/>
-                <Label Grid.Column="2" HorizontalAlignment="Center" Content="Глубина породы"/>
-            </Grid>
+                <!--Данные по породам-->
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <!--Подписи к таблице по породам-->
+                    <Grid Grid.Row="0" Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="1" HorizontalAlignment="Center" Content="Тип (тег) породы"/>
+                        <Label Grid.Column="2" HorizontalAlignment="Center" Content="Глубина породы"/>
+                    </Grid>
 
-            <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
+                    <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
                      ItemsSource="{Binding SelectedItem.EarthDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="20"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding earthType}" TextAlignment="Center"/>
-                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding earthHeight}" TextAlignment="Center"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                    <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding earthType}" TextAlignment="Center"/>
+                                    <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding earthHeight}" TextAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-            <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="20" Command="{Binding AddEarthData}"/>
-            <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="-" FontSize="20" Command="{Binding DeleteEarthData}"/>
 
-        </Grid>
-        <Button Grid.Row="3" Grid.Column="0" Content="Сохранить" HorizontalAlignment="Left" Margin="20,0,0,0"
+                </Grid>
+                <Button Grid.Row="3" Grid.Column="0" Content="Сохранить" HorizontalAlignment="Left" Margin="20,0,0,0"
             VerticalAlignment="Center" Height="35" Width="76" Command="{Binding SaveSegment}"/>
-        <Button Grid.Row="3" Grid.Column="0" Content="Загрузить" HorizontalAlignment="Left" Margin="112,0,0,0"
+                <Button Grid.Row="3" Grid.Column="0" Content="Загрузить" HorizontalAlignment="Left" Margin="112,0,0,0"
             VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadSegment}"/>
-        <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
+                <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
                 VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
                 CommandParameter="{Binding ElementName=MainWindow}"/>
-
-    </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Настройки">
+            <Grid Background="#FFE5E5E5"/>
+        </TabItem>
+    </TabControl>
+    
 </Window>
 
