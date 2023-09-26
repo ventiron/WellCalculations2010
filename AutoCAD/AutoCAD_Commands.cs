@@ -291,7 +291,7 @@ namespace WellCalculations2010.AutoCAD
                                 int index = -1;
                                 foreach(EarthData data in section.Wells[k].EarthDatas)
                                 {
-                                    if (data.earthType == earthData.earthType) index = section.Wells[k].EarthDatas.IndexOf(data);
+                                    if (data.earthType.Equals(earthData.earthType)) index = section.Wells[k].EarthDatas.IndexOf(data);
                                 }
                                 if (index != -1)
                                 {
@@ -308,9 +308,12 @@ namespace WellCalculations2010.AutoCAD
                                         basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
 
                                     if (k == section.Wells.Count - 1)
+                                    {
                                         InterpolateAndAddPoint(earthSurface, new Point3d(
                                             basePoint.X + distFromScale * 1.5 + distForEarth,
                                             basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
+                                        break;
+                                    }
                                 }
                                 else if (earthSurface.Count != 0)
                                 {
@@ -329,7 +332,8 @@ namespace WellCalculations2010.AutoCAD
                                     isInterrupted = false;
                                 }
                             }
-                            AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
+                            if (earthSurface.Count != 0)
+                                AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
                         }
                     }
                     //Увеличиваем расстояние до скважины
@@ -454,8 +458,10 @@ namespace WellCalculations2010.AutoCAD
                 Spline solidEarthSurface = new Spline(solidEarthPoints, 5, 0.0);
                 Spline destEarthSurface = new Spline(destEarthPoints, 5, 0.0);
                 destEarthSurface.LineWeight = LineWeight.LineWeight015;
-                AutoInitial.Initialize(tr, btr, destEarthSurface);
-                AutoInitial.Initialize(tr, btr, solidEarthSurface);
+                if (destEarthPoints.Count != 0)
+                    AutoInitial.Initialize(tr, btr, destEarthSurface);
+                if (solidEarthPoints.Count != 0)
+                    AutoInitial.Initialize(tr, btr, solidEarthSurface);
 
                 if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1)
                 {
