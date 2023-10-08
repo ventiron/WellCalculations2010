@@ -115,7 +115,8 @@ namespace WellCalculations2010.Model
     {
         public GoldData()
         {
-
+            goldContent = "0";
+            goldHeight = 0;
         }
         public GoldData(double goldHeight, string goldContent)
         {
@@ -136,7 +137,8 @@ namespace WellCalculations2010.Model
     {
         public EarthData()
         {
-
+            earthHeight = 0;
+            earthType = "";
         }
         public EarthData(double earthHeight, string earthType)
         {

@@ -1,14 +1,15 @@
-﻿<Window x:Class="WellCalculations2010.WellCalculations_MainWindow"
+﻿<Window x:Class="WellCalculations2010.View.WellCalculations_MainWindow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WellCalculations2010"
              xmlns:VM="clr-namespace:WellCalculations2010.ViewModel"
+             xmlns:View="clr-namespace:WellCalculations2010.View"
+             xmlns:properties="clr-namespace:WellCalculations2010.Properties"
              xmlns:converter="clr-namespace:WellCalculations2010.Converter"
              mc:Ignorable="d" 
              x:Name="MainWindow"
-             Height="600" Width="800">
+             Height="650" Width="800">
     <Window.DataContext>
         <VM:MainViewModel/>
     </Window.DataContext>
@@ -17,6 +18,17 @@
         <converter:RowNumberConverter x:Key="RowNumberConverter"/>
         <converter:IsOddConverter x:Key="IsOddConverter"/>
         <converter:PlusOneConverter x:Key="PlusOneConverter"/>
+
+        <Style x:Key="SettingsTextBox">
+            <Setter Property="Control.Height" Value="23"/>
+            <Setter Property="Control.FontSize" Value="14"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+        </Style>
+        <Style x:Key="SettingsTextBlock">
+            <Setter Property="Control.Height" Value="20"/>
+            <Setter Property="Control.FontSize" Value="14"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+        </Style>
 
         <Style  TargetType="{x:Type ListBoxItem}">
             <Style.Triggers>
@@ -33,8 +45,8 @@
             <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Control}, AncestorLevel=1}}"/>
         </Style>
     </Window.Resources>
-    
-    
+
+
     <TabControl>
         <TabItem Header="Данные по скважинам">
             <Grid>
@@ -50,11 +62,11 @@
                 </Grid.RowDefinitions>
 
                 <!--Выбор горизонтального и вертикального масштабов-->
-                <Label Grid.Row="0" Grid.Column="0" Content="Горизонтальный масштаб" Grid.ColumnSpan="2" Margin="10,0,390,0"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Горизонтальный масштаб" Grid.ColumnSpan="2" Margin="10,0,390,0"/>
                 <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedHorScale}"/>
-                <Label Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Content="Вертикальный масштаб"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Text="Вертикальный масштаб"/>
                 <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="200,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedVertScale}"/>
@@ -73,7 +85,7 @@
                     <!--Подписи к столбцам скважин-->
                     <Grid Grid.Column="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="37"/>
                             <ColumnDefinition Width="50"/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
@@ -85,20 +97,20 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="8"/>
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="1" HorizontalAlignment="Center" Content="№ скв."/>
-                        <Label Grid.Column="2" HorizontalAlignment="Center" Content="H скв."/>
-                        <Label Grid.Column="3" HorizontalAlignment="Center" Content="S до след."/>
-                        <Label Grid.Column="4" HorizontalAlignment="Center" Content="Гл. скв."/>
-                        <Label Grid.Column="5" HorizontalAlignment="Center" Content="Наносы"/>
-                        <Label Grid.Column="6" HorizontalAlignment="Center" Content="Раз.Кор."/>
-                        <Label Grid.Column="7" HorizontalAlignment="Center" Content="Плот.Кор."/>
-                        <Label Grid.Column="8" HorizontalAlignment="Center" Content="Торфа"/>
-                        <Label Grid.Column="9" HorizontalAlignment="Center" Content="Пески"/>
-                        <Label Grid.Column="10" HorizontalAlignment="Center" Content="Сред.Сод."/>
-                        <Label Grid.Column="11" HorizontalAlignment="Center" Content="Верт.Зап."/>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="№ скв."/>
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="H скв."/>
+                        <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Text="S до след."/>
+                        <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Гл. скв."/>
+                        <TextBlock Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Наносы"/>
+                        <TextBlock Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Раз.Кор."/>
+                        <TextBlock Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Плот.Кор."/>
+                        <TextBlock Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Торфа"/>
+                        <TextBlock Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Пески"/>
+                        <TextBlock Grid.Column="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Сред.Сод."/>
+                        <TextBlock Grid.Column="11" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Верт.Зап."/>
                     </Grid>
                     <!--Основные данные по скважинам-->
                     <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding Wells.Count}"
@@ -125,8 +137,8 @@
 
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Padding="2"
-                                   Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex),
+                                    <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2"
+                                   Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex),
                                    Converter={StaticResource PlusOneConverter}}"/>
                                     <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
                                     <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
@@ -196,7 +208,7 @@
                     </Grid>
 
                     <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                     ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedGoldData}">
+                     ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="1" SelectedItem="{Binding SelectedGoldData}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -262,18 +274,77 @@
 
                 </Grid>
                 <Button Grid.Row="3" Grid.Column="0" Content="Сохранить" HorizontalAlignment="Left" Margin="20,0,0,0"
-            VerticalAlignment="Center" Height="35" Width="76" Command="{Binding SaveSegment}"/>
+                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding SaveSegment}"/>
                 <Button Grid.Row="3" Grid.Column="0" Content="Загрузить" HorizontalAlignment="Left" Margin="112,0,0,0"
-            VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadSegment}"/>
+                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadSegment}"/>
+                <Button Grid.Row="3" Grid.Column="1" Content="Excel" HorizontalAlignment="Left" Margin="198,0,0,0"
+                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadFromExcel}"/>
                 <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
-                VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
-                CommandParameter="{Binding ElementName=MainWindow}"/>
+                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
+                    CommandParameter="{Binding ElementName=MainWindow}"/>
+
             </Grid>
         </TabItem>
         <TabItem Header="Настройки">
-            <Grid Background="#FFE5E5E5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+
+
+                <GroupBox Grid.Row="0" Grid.Column="0" Header="Настройки скважин">
+                    <StackPanel>
+                        <TextBlock Text="Количество интерполируемых точек в кривых" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding InterpolatedPointsNumber, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                        <TextBlock Text="Расстояние штриховки разрушенных пород" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding SolidEarthHatchDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Grid.Row="0" Grid.Column="1" Header="Шкалы высот">
+                    <StackPanel>
+                        <TextBlock Text="Расстояние от шкалы высот до первой скв." Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding DistFromScale, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                        <TextBlock Text="Ширина шкалы высот" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding VertScaleWidth, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                        <TextBlock Text="Высота деления шкалы высот" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding VertScaleHeight, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                        <TextBlock Text="Расстояние до отметок высоты" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding VertScaleTextDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                        <TextBlock Text="Размер шрифта отметок высоты" Style="{StaticResource  SettingsTextBlock}"/>
+                        <TextBox Text="{Binding VertScaleFontSize, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Grid.Column="0" Header="Настройки неопределенные">
+                    <StackPanel>
+                        <CheckBox x:Name="IsSplit_CheckBox" Content="Разбивать разрез по длине" Style="{StaticResource  SettingsTextBlock}" 
+                                  IsChecked="{Binding IsSplitByDistance, Source={x:Static properties:Settings.Default}}"/>
+                        <!--Подробные настройки разбивки на листы-->
+                        <GroupBox IsEnabled="{Binding IsChecked, ElementName=IsSplit_CheckBox}">
+                            <StackPanel>
+                                <TextBlock Text="Расстояние до обрезки" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsEnabled="{Binding IsChecked, ElementName=IsSplit_CheckBox}"/>
+                                <TextBox Text="{Binding SplitDistance, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"
+                                    IsEnabled="{Binding IsChecked, ElementName=IsSplit_CheckBox}"/>
+                                <CheckBox Content="Не учитывать длину таблицы" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsChecked="{Binding IsTableConsidered, Source={x:Static properties:Settings.Default}}"/>
+                                <CheckBox Content="Использовать общую верт. линейку" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsChecked="{Binding IsFullVertScaleRullerReq, Source={x:Static properties:Settings.Default}}"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </GroupBox>
+
+                <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Left" Margin="309,5,0,0" Grid.Row="2" VerticalAlignment="Top" Command="{Binding SaveSettings}"/>
+
+            </Grid>
         </TabItem>
     </TabControl>
-    
+
 </Window>
 

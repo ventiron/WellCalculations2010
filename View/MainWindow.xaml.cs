@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WellCalculations2010
+namespace WellCalculations2010.View
 {
     /// <summary>
     /// Логика взаимодействия для UserControl1.xaml

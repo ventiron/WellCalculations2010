@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using TriangulationAutoCAD;
 using WellCalculations2010.Model;
+using WellCalculations2010.View;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Section = WellCalculations2010.Model.Section;
 
@@ -34,14 +35,24 @@ namespace WellCalculations2010.AutoCAD
         private static double minHeight;
         private static double maxHeight;
 
-        private static readonly int InterpolatedPointsNumber = 1;
-        private static readonly double VertScaleWidth = 1;
-        private static readonly double textHeight = 2.5;
-        private static readonly double tableRowMult = 2;
-        private static readonly double TextSpacing = textHeight * tableRowMult;
+        private static int InterpolatedPointsNumber = Properties.Settings.Default.InterpolatedPointsNumber;
+        private static double VertScaleWidth = Properties.Settings.Default.VertScaleWidth;
+        private static double VertScaleHeight = Properties.Settings.Default.VertScaleHeight;
+        private static double VertScaleTextDist = Properties.Settings.Default.VertScaleTextDist;
+        private static double VertScaleTextFontSize = Properties.Settings.Default.VertScaleFontSize;
 
-        private static double distFromScale = 20;
+        private static double textHeight = 2.5;
 
+        private static double tableTextHeight = 2.5;
+        private static double contentsTextHeight = 0.2;
+        private static double contentsDepthTextHeight = 0.15;
+
+        private static double tableRowMult = 2;
+        private static double TextSpacing = textHeight * tableRowMult;
+
+        private static double distFromScale = Properties.Settings.Default.DistFromScale;
+
+        private static double SolidEarthHatchDist = Properties.Settings.Default.SolidEarthHatchDist;
 
         [CommandMethod("РРР")]
         public void DrawSection_Command()
@@ -61,17 +72,16 @@ namespace WellCalculations2010.AutoCAD
             {
                 return;
             }
+            UpdateSettings();
 
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
 
+
             vertScale = GetScaleFromText(section.VerticalScale);
             horScale = GetScaleFromText(section.HorizontalScale);
-            vertScaleStep = vertScale * 10.0;
-            distFromScale = 20 + 5 / horScale;
+            vertScaleStep = vertScale * VertScaleHeight;
 
-            
-            
 
             CalculateMinMaxHeight(section);
 
@@ -84,21 +94,68 @@ namespace WellCalculations2010.AutoCAD
             }
             Point3d basePoint = ppr.Value;
 
-
-            //Блочим документ потому что так надо
-            using (doc.LockDocument())
+            try
             {
-                FormatSectionStrings(section);
+                //Блочим документ потому что так надо
+                using (doc.LockDocument())
+                {
+                    FormatSectionStrings(section);
+                    if (!Properties.Settings.Default.IsSplitByDistance)
+                    {
+                        DrawScaleRuler(basePoint);
+                        DrawTable(basePoint, section);
+                        DrawWells(basePoint, section);
+                        DrawGoldContents(basePoint, section);
+                        DrawEarthTypes(basePoint, section);
+                        DrawHardEarthTypes(basePoint, section);
+                    }
+                    else
+                    {
+                        double length = 0;
+                        double currentDist = 0;
+                        double tableLength = distFromScale * 1.5 + 55;
+                        double distModifier = !Properties.Settings.Default.IsTableConsidered ? tableLength : distFromScale;
+                        
+                        double distBetveenSections = 100;
+                        Section splitSection = new Section();
+                        for(int i = 0; i < section.Wells.Count; i++)
+                        {
+                            splitSection.Wells.Add(section.Wells[i]);
+                            length += section.Wells[i].DistanceToNextWell / horScale;
+                            if((length + distModifier > Properties.Settings.Default.SplitDistance) || i == section.Wells.Count - 1)
+                            {
+                                Point3d splitPoint = new Point3d(basePoint.X + currentDist, basePoint.Y, basePoint.Z);
 
-                DrawScaleRuler(basePoint);
-                DrawTable(basePoint, section);
+                                currentDist += length + tableLength + distBetveenSections;
 
-                DrawWells(basePoint, section);
-                DrawGoldContents(basePoint, section);
-                DrawEarthTypes(basePoint, section);
-                DrawHardEarthTypes(basePoint, section);
+                                if(!Properties.Settings.Default.IsFullVertScaleRullerReq)
+                                    CalculateMinMaxHeight(splitSection);
+
+                                DrawScaleRuler(splitPoint);
+                                DrawTable(splitPoint, splitSection);
+                                DrawWells(splitPoint, splitSection);
+                                DrawGoldContents(splitPoint, splitSection);
+                                DrawEarthTypes(splitPoint, splitSection);
+                                DrawHardEarthTypes(splitPoint, splitSection);
+
+                                Well lastWell = splitSection.Wells[splitSection.Wells.Count - 1];
+                                splitSection = new Section();
+                                length = 0;
+                            
+                                if(lastWell.DistanceToNextWell + distModifier <= Properties.Settings.Default.SplitDistance)
+                                {
+                                    splitSection.Wells.Add(lastWell);
+                                    length += lastWell.DistanceToNextWell / horScale;
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
+            catch(System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         /// <summary>
@@ -111,10 +168,14 @@ namespace WellCalculations2010.AutoCAD
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
 
+            
+
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
                 BlockTable bt = tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
                 BlockTableRecord btr = tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+
 
                 //Основной цикл отрисовки
                 double currentDist = 0;
@@ -166,7 +227,7 @@ namespace WellCalculations2010.AutoCAD
                 HatchTwoSplines(surface, surfaceTemp, "EARTH", 0.4, 40);
                 surfaceTemp.Erase();
 
-
+                
 
                 tr.Commit();
             }
@@ -179,8 +240,8 @@ namespace WellCalculations2010.AutoCAD
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
         private static void DrawGoldContents(Point3d basePoint, Section section)
         {
-            double goldContentTextHeight = 0.2 / vertScale;
-            double goldContentDepthTextHeight = 0.15 / vertScale;
+            double goldContentTextHeight = 0.15 / vertScale;
+            double goldContentDepthTextHeight = 0.1 / vertScale;
 
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -463,23 +524,23 @@ namespace WellCalculations2010.AutoCAD
                 if (solidEarthPoints.Count != 0)
                     AutoInitial.Initialize(tr, btr, solidEarthSurface);
 
-                if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1)
+                if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - InterpolatedPointsNumber)
                 {
-                    Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, 40);
+                    Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, SolidEarthHatchDist);
                     AutoInitial.Initialize(tr, btr, tempSolidSpline);
-                    HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 4);
+                    HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 2);
                     tempSolidSpline.Erase();
 
                     if (solidEarthPoints.Count == destEarthPoints.Count)
                     {
-                        HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 2);
+                        HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 4);
                     }
                 }
                 if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && isThereNoSolidHardEarth)
                 {
-                    Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, 40);
+                    Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, SolidEarthHatchDist);
                     AutoInitial.Initialize(tr, btr, tempDestSpline);
-                    HatchTwoSplines(destEarthSurface, tempDestSpline, "ANSI31" , 2);
+                    HatchTwoSplines(destEarthSurface, tempDestSpline, "ANSI31" , 4);
                     tempDestSpline.Erase();
                 }
                 tr.Commit();
@@ -551,7 +612,7 @@ namespace WellCalculations2010.AutoCAD
                 {
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                         new Point3d(basePoint.X - xTableOffset, basePoint.Y - distFromTable - tableRowDist * i, 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale * 2,
+                        new Point3d(basePoint.X + currentDist + distFromScale * 1.5,
                         basePoint.Y - distFromTable - tableRowDist * i, 0)));
                 }
 
@@ -607,10 +668,10 @@ namespace WellCalculations2010.AutoCAD
                 {
                     //Полилиния - один сегмент шкалы вертикального масштаба
                     Polyline poly = new Polyline();
-                    poly.AddVertexAt(0, new Point2d(basePoint.X, basePoint.Y + 10 * i), 0.0, -1.0, -1.0);
-                    poly.AddVertexAt(1, new Point2d(basePoint.X, basePoint.Y + 10 * (i + 1)), 0.0, -1.0, -1.0);
-                    poly.AddVertexAt(2, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + 10 * (i + 1)), 0.0, -1.0, -1.0);
-                    poly.AddVertexAt(3, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + 10 * i), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(0, new Point2d(basePoint.X, basePoint.Y + VertScaleHeight * i), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(1, new Point2d(basePoint.X, basePoint.Y + VertScaleHeight * (i + 1)), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(2, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + VertScaleHeight * (i + 1)), 0.0, -1.0, -1.0);
+                    poly.AddVertexAt(3, new Point2d(basePoint.X + VertScaleWidth, basePoint.Y + VertScaleHeight * i), 0.0, -1.0, -1.0);
                     poly.Closed = true;
 
                     AutoInitial.Initialize(tr, btr, poly);
@@ -636,7 +697,7 @@ namespace WellCalculations2010.AutoCAD
                     if (((minHeight + vertScaleStep * i) % (vertScaleStep * 5.0)) == 0.0)
                     {
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{minHeight + vertScaleStep * i}"),
-                            new Point3d(basePoint.X - 5, basePoint.Y + 10 * i, 0), 0, 0, textHeight, 0, AttachmentPoint.MiddleRight));
+                            new Point3d(basePoint.X - VertScaleTextDist, basePoint.Y + VertScaleHeight * i, 0), 0, 0, VertScaleTextFontSize, 0, AttachmentPoint.MiddleRight));
                     }
                 }
                 tr.Commit();
@@ -849,6 +910,17 @@ namespace WellCalculations2010.AutoCAD
             
             points.Add(point);
         }
+
+        private static void UpdateSettings()
+        {
+            distFromScale = Properties.Settings.Default.DistFromScale;
+            VertScaleWidth = Properties.Settings.Default.VertScaleWidth;
+            InterpolatedPointsNumber = Properties.Settings.Default.InterpolatedPointsNumber;
+            SolidEarthHatchDist = Properties.Settings.Default.SolidEarthHatchDist;
+            VertScaleHeight = Properties.Settings.Default.VertScaleHeight;
+            VertScaleTextDist = Properties.Settings.Default.VertScaleTextDist;
+            VertScaleTextFontSize = Properties.Settings.Default.VertScaleFontSize;
+    }
 
 
         public void Initialize()
