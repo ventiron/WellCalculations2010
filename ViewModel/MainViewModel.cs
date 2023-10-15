@@ -362,9 +362,10 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return drawSegment == null ?
-                    (drawSegment = new SimpleCommand(obj => {
+                    (drawSegment = new SimpleCommand(obj =>
+                    {
                         List<Well> wells = new List<Well>();
-                        foreach(Well well in Wells)
+                        foreach (Well well in Wells)
                         {
                             wells.Add((Well)well.Clone());
                         }
@@ -374,7 +375,7 @@ namespace WellCalculations2010.ViewModel
                         if (true)
                         {
                             ((Window)obj).WindowState = WindowState.Minimized;
-                            AutoCAD_Commands.DrawSection(section);
+                            WellDrawer.DrawSection(section);
                             return;
                         }
 

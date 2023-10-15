@@ -17,12 +17,15 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.GraphicsInterface;
 using Autodesk.Windows;
 
+
 namespace TriangulationAutoCAD
 {
     class AutoInitial
     {
         // Функции для автоматической инициализации объектов в AutoCAD
         // НЕ ОТРИСОВЫВАЮТ, НЕ ЗАНОСЯТ В БАЗЫ ДАННЫХ, ТОЛЬКО ИНИЦИАЛИЗИРУЮТ
+
+        #region [CreateLine]
         public static Line CreateLine(Point3d firstPoint, Point3d secondPoint, byte color = 0, LineWeight lineWeight = LineWeight.ByLayer)
         {
             Line line = new Line(firstPoint, secondPoint);
@@ -80,6 +83,9 @@ namespace TriangulationAutoCAD
             return line;
 
         }
+        #endregion
+
+        #region [CreateMtext]
         public static MText CreateMtext(String content, Point3d location, byte color = 0, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.TopLeft)
         {
             MText text = new MText();
@@ -176,6 +182,9 @@ namespace TriangulationAutoCAD
 
             return text;
         }
+        #endregion
+
+        #region [CreateDBPoint]
         public static DBPoint CreateDBPoint(Point3d location)
         {
             DBPoint point = new DBPoint(location);
@@ -202,6 +211,7 @@ namespace TriangulationAutoCAD
             point.TransformBy(matrix);
             return point;
         }
+        #endregion
         // Отрисовывает любые доступные для этого объекты
         public static void Initialize(Transaction tr, BlockTableRecord btr, Entity en, bool add = true)
         {

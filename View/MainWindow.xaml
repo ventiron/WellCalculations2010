@@ -278,7 +278,7 @@
                 <Button Grid.Row="3" Grid.Column="0" Content="Загрузить" HorizontalAlignment="Left" Margin="112,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadSegment}"/>
                 <Button Grid.Row="3" Grid.Column="1" Content="Excel" HorizontalAlignment="Left" Margin="198,0,0,0"
-                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadFromExcel}"/>
+                    VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadFromExcel}" Visibility="Hidden"/>
                 <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
                     CommandParameter="{Binding ElementName=MainWindow}"/>
