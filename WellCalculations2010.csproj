@@ -128,13 +128,6 @@
     <Folder Include="Validation\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="TestImage_16.png" />
-    <Resource Include="TestImage_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Image_92.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Image_32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
