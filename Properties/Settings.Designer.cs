@@ -12,7 +12,7 @@ namespace WellCalculations2010.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.6.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.7.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -164,6 +164,42 @@ namespace WellCalculations2010.Properties {
             }
             set {
                 this["IsFullVertScaleRullerReq"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double WellMarkSize {
+            get {
+                return ((double)(this["WellMarkSize"]));
+            }
+            set {
+                this["WellMarkSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.5")]
+        public double PlanarTextDistFromMark {
+            get {
+                return ((double)(this["PlanarTextDistFromMark"]));
+            }
+            set {
+                this["PlanarTextDistFromMark"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double WellPlanarTextSize {
+            get {
+                return ((double)(this["WellPlanarTextSize"]));
+            }
+            set {
+                this["WellPlanarTextSize"] = value;
             }
         }
     }

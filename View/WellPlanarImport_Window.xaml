@@ -1,0 +1,164 @@
+﻿<Window x:Class="WellCalculations2010.View.WellPlanarImport_Window"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:VM="clr-namespace:WellCalculations2010.ViewModel"
+        xmlns:properties="clr-namespace:WellCalculations2010.Properties"
+        xmlns:converter="clr-namespace:WellCalculations2010.Converter"
+        xmlns:local="clr-namespace:WellCalculations2010.View"
+        mc:Ignorable="d"
+        Title="WellPlanarImport_Window" Height="550" Width="600" x:Name="WellPlanarImport_MainWindow">
+
+    <Window.DataContext>
+        <VM:WellPlanarImport_ViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Control.Height" Value="23"/>
+            <Setter Property="Control.FontSize" Value="14"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+        </Style>
+        <Style x:Key="SettingsTextBlock">
+            <Setter Property="Control.Height" Value="20"/>
+            <Setter Property="Control.FontSize" Value="14"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+        </Style>
+    </Window.Resources>
+
+    <TabControl>
+        <TabItem Header="Импорт точек">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Выбор шаблона--><!--
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                        <TextBlock Height="24" Text="Шаблон данных" FontSize="14"/>
+                        <ComboBox Height="24" ItemsSource="{Binding Patterns}" SelectedItem="0" SelectedValue="{Binding SelectedPattern}"/>
+                    </StackPanel>-->
+                    
+                    <!--Кнопки прочитки файла и отрисовки-->
+                    <!--<Button Grid.Column="0" Grid.Row="1" Content="Считать из файла" Command="{Binding LoadAndBreakFile}"/>-->
+                    <Button Grid.Column="1" Grid.Row="1" Content="Отрисовать" Command="{Binding ImportWells}" CommandParameter="{Binding ElementName=WellPlanarImport_MainWindow}"/>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+
+                    <!--Заголовки столбцов-->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                    <ListBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding wells}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Expander IsExpanded="True" HorizontalContentAlignment="Stretch">
+                                    <!--Основная информация по скважине-->
+                                    <Expander.Header>
+                                        <Grid HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBox Grid.Column="0" Text="{Binding WellName}"/>
+                                            <TextBox Grid.Column="1" Text="{Binding WellDepth}"/>
+                                            <TextBox Grid.Column="2" Text="{Binding WellHeadPoint.X}"/>
+                                            <TextBox Grid.Column="3" Text="{Binding WellHeadPoint.Y}"/>
+                                            <TextBox Grid.Column="4" Text="{Binding WellHeadPoint.Z}"/>
+                                        </Grid>
+                                    </Expander.Header>
+                                    <!--Данные по пластам-->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="24"/>
+                                        </Grid.RowDefinitions>
+
+                                        <ListBox Grid.Column="1" 
+                                             HorizontalContentAlignment="Stretch" ItemsSource="{Binding GoldLayers}" BorderBrush="Transparent">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="{x:Type ListBoxItem}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                                <ContentPresenter/>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid HorizontalAlignment="Stretch">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBox Grid.Column="0" Text="{Binding depth}"/>
+                                                        <TextBox Grid.Column="1" Text="{Binding goldContent}"/>
+                                                        <TextBox Grid.Column="2" Text="{Binding thickness}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <!--Кнопка добавления данных по пластам-->
+                                        <Button Grid.Column="1" Grid.Row="1" Content="+" FontSize="14" VerticalContentAlignment="Center" Padding="0" 
+                                                Command="{Binding DataContext.AddGoldLayer, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}"/>
+                                    </Grid>
+                                </Expander>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Button Grid.Row="2" Content="+" FontSize="14" VerticalContentAlignment="Center" Padding="0" 
+                        Command="{Binding AddWell}"/>
+                </Grid>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                    <TextBlock Text="Обнаружено точек: "/>
+                    <TextBlock Text="{Binding AllPoints.Count}"/>
+                    <TextBlock Text=" Ошибок: "/>
+                    <TextBlock Text="{Binding ErrCounter, TargetNullValue='',
+                        NotifyOnSourceUpdated=True,  UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Настройки">
+            
+        </TabItem>
+    </TabControl>
+</Window>

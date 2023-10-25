@@ -18,7 +18,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace WellCalculations2010.AutoCAD
 {
-    internal class WellDrawer
+    internal class SectionDrawer
     {
         private static double vertScale;
         private static double horScale;
@@ -169,31 +169,31 @@ namespace WellCalculations2010.AutoCAD
                     // Первая точка сплайна поверхности
                     if (i == 0)
                     {
-                        surfacePoints.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                        surfacePoints.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
                     }
 
                     //Отрисовываем скважину
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight), 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0), 0, LineWeight.LineWeight015));
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0),
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth), 0), 0, LineWeight.LineWeight015));
                     //Отрисовываем нижнюю риску скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
-                        new Point3d(basePoint.X + currentDist + distFromScale - 1, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale + 1, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth), 0)));
+                        new Point3d(basePoint.X + currentDist + distFromScale - 1, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth), 0),
+                        new Point3d(basePoint.X + currentDist + distFromScale + 1, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth), 0)));
                     //Отрисовываем название и высоту скважины
-                    AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.WellName}\n\\O{well.WellHeight.ToString("0.0").Replace('.', ',')}"),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight) + 10, 0),
-                        0, 0, textHeight, 0, AttachmentPoint.MiddleCenter));
+                    AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.WellName}\n\\O{well.WellHeadPoint.Z.ToString("0.0").Replace('.', ',')}"),
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z) + 10, 0),
+                        textHeight: textHeight, atPoint: AttachmentPoint.MiddleCenter));
                     //Отрисовываем глубину скважины
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont(well.WellDepth.ToString("0.0").Replace('.', ',')),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth) - 5, 0),
-                        0, 0, textHeight, 0, AttachmentPoint.TopCenter));
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth) - 5, 0),
+                        textHeight: textHeight, atPoint: AttachmentPoint.TopCenter));
 
 
                     //Отрисовываем сплайн поверхности
-                    InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                    InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
                     if (i == section.Wells.Count - 1)
-                        InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeight), 0));
+                        InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
                     //Увеличиваем расстояние до скважины
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
@@ -242,7 +242,7 @@ namespace WellCalculations2010.AutoCAD
                     for (int j = 0; j < well.GoldDatas.Count; j++)
                     {
                         //Отрисовываем нижнюю риску содержания
-                        bottomHeight = basePoint.Y + GetHeightDifference(well.WellHeight - well.GoldDatas[j].goldHeight);
+                        bottomHeight = basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.GoldDatas[j].goldHeight);
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                             new Point3d(basePoint.X + currentDist + distFromScale, bottomHeight, 0),
                             new Point3d(basePoint.X + currentDist + distFromScale + 1, bottomHeight, 0)));
@@ -250,7 +250,7 @@ namespace WellCalculations2010.AutoCAD
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                             ApplyAutoCADFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.', ',')}"),
                             new Point3d(basePoint.X + currentDist + distFromScale - 1, bottomHeight, 0),
-                            0, 0, goldContentDepthTextHeight, 0, AttachmentPoint.MiddleRight));
+                            textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight));
 
                         //Отрисовываем верхнюю риску содержания при нужде
                         if ((topHeight - bottomHeight) * vertScale > 0.5)
@@ -264,13 +264,13 @@ namespace WellCalculations2010.AutoCAD
                             AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                                 ApplyAutoCADFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
                                 new Point3d(basePoint.X + currentDist + distFromScale - 1, topHeight, 0),
-                                0, 0, goldContentDepthTextHeight, 0, AttachmentPoint.MiddleRight));
+                                textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight));
                         }
 
                         //Отрисовываем само содержание
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{well.GoldDatas[j].goldContent}"),
                             new Point3d(basePoint.X + currentDist + distFromScale + 3, bottomHeight + (topHeight - bottomHeight) / 2,
-                            0), 0, 0, goldContentTextHeight, 0, AttachmentPoint.MiddleLeft));
+                            0), textHeight: goldContentTextHeight, atPoint: AttachmentPoint.MiddleLeft));
 
                         topHeight = bottomHeight;
                     }
@@ -317,14 +317,14 @@ namespace WellCalculations2010.AutoCAD
                             //Отрисовываем экстраполяцию в начало если скважина - первая в буровой линии
                             if (i == 0)
                                 earthSurface.Add(new Point3d(
-                                    basePoint.X + distFromScale / 2 + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeight - earthData.earthHeight), 0));
+                                    basePoint.X + distFromScale / 2 + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
                             else
                                 earthSurface.Add(new Point3d(
                                     basePoint.X + distFromScale + distForEarth - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeight - earthData.earthHeight), 0));
+                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
                             //Отрисовываем первую точку в первой скважине
                             InterpolateAndAddPoint(earthSurface, new Point3d(
-                                    basePoint.X + distFromScale + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeight - earthData.earthHeight), 0));
+                                    basePoint.X + distFromScale + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
 
                             bool isInterrupted = false;
                             distForEarth += well.DistanceToNextWell / horScale;
@@ -343,17 +343,17 @@ namespace WellCalculations2010.AutoCAD
                                     if (earthSurface.Count == 0)
                                         earthSurface.Add(new Point3d(
                                             basePoint.X + distFromScale + distForEarth - section.Wells[k - 1].DistanceToNextWell / horScale / 2,
-                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
+                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
                                     //Добавляем найденную точку в коллекцию точек поверхности
                                     InterpolateAndAddPoint(earthSurface, new Point3d(
                                         basePoint.X + distFromScale + distForEarth,
-                                        basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
+                                        basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
 
                                     if (k == section.Wells.Count - 1)
                                     {
                                         InterpolateAndAddPoint(earthSurface, new Point3d(
                                             basePoint.X + distFromScale * 1.5 + distForEarth,
-                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeight - nextEarthData.earthHeight), 0));
+                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
                                         break;
                                     }
                                 }
@@ -428,21 +428,21 @@ namespace WellCalculations2010.AutoCAD
                             {
                                 solidEarthPoints.Add(new Point3d(
                                         basePoint.X + distFromScale / 2 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
                             }
                             else
                                 solidEarthPoints.Add(new Point3d(
                                     basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
+                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
                         }
                         InterpolateAndAddPoint(solidEarthPoints, new Point3d(
                                         basePoint.X + distFromScale + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
                         if (i == section.Wells.Count - 1)
                         {
                             InterpolateAndAddPoint(solidEarthPoints, new Point3d(
                                         basePoint.X + distFromScale * 1.5 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
                         }
                     }
                     else if (solidEarthPoints.Count != 0)
@@ -463,21 +463,21 @@ namespace WellCalculations2010.AutoCAD
                             {
                                 destEarthPoints.Add(new Point3d(
                                         basePoint.X + distFromScale / 2 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
                             }
                             else
                                 destEarthPoints.Add(new Point3d(
                                     basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
+                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
                         }
                         InterpolateAndAddPoint(destEarthPoints, new Point3d(
                                         basePoint.X + distFromScale + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
                         if (i == section.Wells.Count - 1)
                         {
                             InterpolateAndAddPoint(destEarthPoints, new Point3d(
                                         basePoint.X + distFromScale * 1.5 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeight - well.WellDepth + destEarth + solidEarth), 0));
+                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
                         }
                     }
                     else if (destEarthPoints.Count != 0)
@@ -557,7 +557,7 @@ namespace WellCalculations2010.AutoCAD
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                             ApplyAutoCADFont($"{well.WellName}"),
                             new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
-                            0, 0, textHeight, 0, AttachmentPoint.TopCenter));
+                            textHeight: textHeight, atPoint: AttachmentPoint.TopCenter));
                     //Риска расстояния между скважинами
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist, 0),
@@ -569,7 +569,7 @@ namespace WellCalculations2010.AutoCAD
                         ApplyAutoCADFont(well.DistanceToNextWell.ToString("0.0").Replace('.', ',')),
                         new Point3d(basePoint.X + currentDist + distFromScale + well.DistanceToNextWell / 2 / horScale,
                         basePoint.Y - distFromTable - tableRowDist * 1.20, 0),
-                        0, 0, textHeight, 0, AttachmentPoint.TopCenter));
+                       textHeight: textHeight, atPoint: AttachmentPoint.TopCenter));
                     }
                     //Прочие табличные данные
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
@@ -582,7 +582,7 @@ namespace WellCalculations2010.AutoCAD
                         $"{well.GoldLayerContentSlip}\n" +
                         $"{well.VerticalGoldContent}\n"),
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2.20, 0),
-                        0, 0, textHeight, 0, TextSpacing, AttachmentPoint.TopCenter));
+                        textHeight: textHeight, lineSpacing: TextSpacing, atPoint:  AttachmentPoint.TopCenter));
 
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
@@ -599,7 +599,7 @@ namespace WellCalculations2010.AutoCAD
 
                 //Отрисовываем надписи (легенду) таблицы
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
-                    ApplyAutoCADFont("Номер разреза\n" +
+                    ApplyAutoCADFont("Номер скважины\n" +
                     "Расстояние между скважинами\n" +
                     "Глубина скважин\n" +
                     "Пройдено по наносам\n" +
@@ -610,7 +610,7 @@ namespace WellCalculations2010.AutoCAD
                     "Содержание на пласт\n" +
                     "Вертикальный запас"),
                     new Point3d(basePoint.X - xTableOffset * 0.95, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
-                    0, 0, textHeight, 0, TextSpacing, AttachmentPoint.TopLeft));
+                    textHeight: textHeight, lineSpacing: TextSpacing, atPoint: AttachmentPoint.TopLeft));
                 //Отрисовываем единицы измерения легенды
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                     ApplyAutoCADFont("м\n" +
@@ -624,7 +624,7 @@ namespace WellCalculations2010.AutoCAD
                     "г\\м²\n" +
                     "г\\м³\n"),
                     new Point3d(basePoint.X + 1, basePoint.Y - distFromTable - tableRowDist * 0.20, 0),
-                    0, 0, textHeight, 0, TextSpacing, AttachmentPoint.TopCenter));
+                    textHeight: textHeight, lineSpacing: TextSpacing, atPoint: AttachmentPoint.TopCenter));
 
 
                 tr.Commit();
@@ -678,7 +678,8 @@ namespace WellCalculations2010.AutoCAD
                     if (((minHeight + vertScaleStep * i) % (vertScaleStep * 5.0)) == 0.0)
                     {
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{minHeight + vertScaleStep * i}"),
-                            new Point3d(basePoint.X - VertScaleTextDist, basePoint.Y + VertScaleHeight * i, 0), 0, 0, VertScaleTextFontSize, 0, AttachmentPoint.MiddleRight));
+                            new Point3d(basePoint.X - VertScaleTextDist, basePoint.Y + VertScaleHeight * i, 0), 
+                            textHeight: VertScaleTextFontSize, atPoint: AttachmentPoint.MiddleRight));
                     }
                 }
                 tr.Commit();
@@ -789,7 +790,7 @@ namespace WellCalculations2010.AutoCAD
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private static string ApplyAutoCADFont(string text)
+        public static string ApplyAutoCADFont(string text)
         {
 
             string fontChange = "{\\fTimes new Roman|b0|i0|c204|p18;";
@@ -798,14 +799,14 @@ namespace WellCalculations2010.AutoCAD
 
         private static void CalculateMinMaxHeight(Section section)
         {
-            minHeight = section.Wells[0].WellHeight - section.Wells[0].WellDepth;
-            maxHeight = section.Wells[0].WellHeight;
+            minHeight = section.Wells[0].WellHeadPoint.Z - section.Wells[0].WellDepth;
+            maxHeight = section.Wells[0].WellHeadPoint.Z;
 
             //Рассчитываем минимальную и максимальную высоту буровой линии
             foreach (Well well in section.Wells)
             {
-                if (minHeight > well.WellHeight - well.WellDepth) minHeight = well.WellHeight - well.WellDepth;
-                if (maxHeight < well.WellHeight) maxHeight = well.WellHeight;
+                if (minHeight > well.WellHeadPoint.Z - well.WellDepth) minHeight = well.WellHeadPoint.Z - well.WellDepth;
+                if (maxHeight < well.WellHeadPoint.Z) maxHeight = well.WellHeadPoint.Z;
             }
 
             minHeight = (minHeight % vertScaleStep) == 0 ? minHeight : minHeight - (minHeight % vertScaleStep);
@@ -816,7 +817,7 @@ namespace WellCalculations2010.AutoCAD
             maxHeight += vertScaleStep * 3;
         }
 
-        private static void FormatSectionStrings(Section section)
+        public static void FormatSectionStrings(Section section)
         {
             foreach (Well well in section.Wells)
             {
@@ -827,6 +828,7 @@ namespace WellCalculations2010.AutoCAD
                 well.GoldLayerThickness = well.GoldLayerThickness.Trim().Replace(',', '.');
                 well.GoldLayerContentSlip = well.GoldLayerContentSlip.Trim().Replace(',', '.');
                 well.VerticalGoldContent = well.VerticalGoldContent.Trim().Replace(',', '.');
+                
 
                 if (double.TryParse(well.SoftEarthThickness, out double softEarthThickness))
                 {
@@ -862,6 +864,13 @@ namespace WellCalculations2010.AutoCAD
                     if (double.TryParse(goldData.goldContent, out double goldContent))
                     {
                         goldData.goldContent = goldContent.ToString("0.000").Replace('.', ',');
+                    }
+                }
+                foreach (GoldLayer goldLayer in well.GoldLayers)
+                {
+                    if (double.TryParse(goldLayer.goldContent, out double content))
+                    {
+                        goldLayer.goldContent = content.ToString("0.000").Replace('.', ',');
                     }
                 }
             }

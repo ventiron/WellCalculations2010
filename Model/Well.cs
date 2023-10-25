@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,21 +9,7 @@ using WellCalculations2010.ViewModel;
 namespace WellCalculations2010.Model
 {
 
-    [Serializable]
-    public class Section
-    {
-        public Section() 
-        {
-            Wells = new List<Well>();
-        }
-        public Section(List<Well> Wells)
-        {
-            this.Wells = Wells;
-        }
-        public List<Well> Wells { get; set; }
-        public string HorizontalScale { get; set; }
-        public string VerticalScale { get; set; }
-    }
+
 
     [Serializable]
     public class Well : ICloneable
@@ -31,26 +18,10 @@ namespace WellCalculations2010.Model
         {
             GoldDatas = new ObservableCollection<GoldData>();
             EarthDatas = new ObservableCollection<EarthData>();
+            GoldLayers = new ObservableCollection<GoldLayer>();
+            WellHeadPoint = new Point();
             WellName = "0";
             DistanceToNextWell = 0;
-            WellHeight = 0;
-            WellDepth = 0;
-            SoftEarthThickness = "";
-            DestHardEarthThickness = "";
-            SolidHardEarthThickness = "";
-            TurfThickness = "";
-            GoldLayerThickness = "";
-            GoldLayerContentSlip = "";
-            VerticalGoldContent = "";
-        }
-
-        public Well(ObservableCollection<GoldData> GoldDatas, ObservableCollection<EarthData> EarthDatas)
-        {
-            this.GoldDatas = GoldDatas;
-            this.EarthDatas = EarthDatas;
-            WellName = "0";
-            DistanceToNextWell = 0;
-            WellHeight = 0;
             WellDepth = 0;
             SoftEarthThickness = "";
             DestHardEarthThickness = "";
@@ -63,11 +34,13 @@ namespace WellCalculations2010.Model
 
         public ObservableCollection<GoldData> GoldDatas { get; set; }
         public ObservableCollection<EarthData> EarthDatas { get; set; }
+        public ObservableCollection<GoldLayer> GoldLayers { get; set; }
 
+
+        public Point WellHeadPoint { get; set; }
 
         public string WellName { get; set; }
         public double DistanceToNextWell { get; set; }
-        public double WellHeight { get; set; }
         public double WellDepth { get; set; }
         public string SoftEarthThickness { get; set; }
         public string DestHardEarthThickness { get; set; }
@@ -80,13 +53,13 @@ namespace WellCalculations2010.Model
         public object Clone()
         {
             Well clone = new Well();
+            clone.WellHeadPoint = (Point)this.WellHeadPoint.Clone();
             clone.WellName = this.WellName;
             clone.DistanceToNextWell = this.DistanceToNextWell;
-            clone.WellHeight = this.WellHeight;
             clone.WellDepth = this.WellDepth;
             clone.SoftEarthThickness = this.SoftEarthThickness;
             clone.DestHardEarthThickness = this.DestHardEarthThickness;
-            clone.SolidHardEarthThickness= this.SolidHardEarthThickness;
+            clone.SolidHardEarthThickness = this.SolidHardEarthThickness;
             clone.TurfThickness = this.TurfThickness;
             clone.GoldLayerThickness = this.GoldLayerThickness;
             clone.GoldLayerContentSlip = this.GoldLayerContentSlip;
@@ -94,8 +67,9 @@ namespace WellCalculations2010.Model
 
             ObservableCollection<GoldData> goldDatas = new ObservableCollection<GoldData>();
             ObservableCollection<EarthData> earthDatas = new ObservableCollection<EarthData>();
+            ObservableCollection<GoldLayer> goldLayers = new ObservableCollection<GoldLayer>();
 
-            foreach(GoldData goldData in this.GoldDatas)
+            foreach (GoldData goldData in this.GoldDatas)
             {
                 goldDatas.Add((GoldData)goldData.Clone());
             }
@@ -103,55 +77,19 @@ namespace WellCalculations2010.Model
             {
                 earthDatas.Add((EarthData)earthData.Clone());
             }
+            foreach (GoldLayer goldLayer in this.GoldLayers)
+            {
+                goldLayers.Add((GoldLayer)goldLayer.Clone());
+            }
 
             clone.GoldDatas = goldDatas;
             clone.EarthDatas = earthDatas;
+            clone.GoldLayers = goldLayers;
 
             return clone;
         }
     }
-    [Serializable]
-    public class GoldData : ICloneable
-    {
-        public GoldData()
-        {
-            goldContent = "0";
-            goldHeight = 0;
-        }
-        public GoldData(double goldHeight, string goldContent)
-        {
-            this.goldContent = goldContent;
-            this.goldHeight = goldHeight;
-        }
 
-        public string goldContent { get; set; }
-        public double goldHeight { get; set; }
 
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
-    }
-    [Serializable]
-    public class EarthData : ICloneable
-    {
-        public EarthData()
-        {
-            earthHeight = 0;
-            earthType = "";
-        }
-        public EarthData(double earthHeight, string earthType)
-        {
-            this.earthHeight = earthHeight;
-            this.earthType = earthType;
-        }
 
-        public double earthHeight { get; set; }
-        public string earthType { get; set; }
-
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
-    }
 }

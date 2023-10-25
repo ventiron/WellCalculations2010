@@ -26,27 +26,39 @@ namespace WellCalculations2010.AutoCAD
 {
     public class AutoCAD_Commands : Autodesk.AutoCAD.Runtime.IExtensionApplication
     {
-        private static WellCalculations_MainWindow _MainWindow;
+        private static SectionDrawer_Window _SectionDrawer_Window;
+        private static WellPlanarImport_Window _WellPlanarImport_Window;
 
 
 
         [CommandMethod("РРР")]
         public void DrawSection_Command()
         {
-            if(_MainWindow == null || !_MainWindow.IsLoaded)
-                _MainWindow = new WellCalculations_MainWindow();
-            if (_MainWindow.IsLoaded && _MainWindow.WindowState == System.Windows.WindowState.Minimized)
-                _MainWindow.WindowState = System.Windows.WindowState.Normal;
+            if(_SectionDrawer_Window == null || !_SectionDrawer_Window.IsLoaded)
+                _SectionDrawer_Window = new SectionDrawer_Window();
+            if (_SectionDrawer_Window.IsLoaded && _SectionDrawer_Window.WindowState == System.Windows.WindowState.Minimized)
+                _SectionDrawer_Window.WindowState = System.Windows.WindowState.Normal;
             else
-                _MainWindow.Show();
+                _SectionDrawer_Window.Show();
+        }
+
+        [CommandMethod("ИмпортСкважин")]
+        public void ImportWells()
+        {
+            if (_WellPlanarImport_Window == null || !_WellPlanarImport_Window.IsLoaded)
+                _WellPlanarImport_Window = new WellPlanarImport_Window();
+            if (_WellPlanarImport_Window.IsLoaded && _WellPlanarImport_Window.WindowState == System.Windows.WindowState.Minimized)
+                _WellPlanarImport_Window.WindowState = System.Windows.WindowState.Normal;
+            else
+               _WellPlanarImport_Window.Show();
         }
 
 
-        
+        private static readonly string TabName = "InenTironAddin";
+        private static readonly string TabId = "InenTironAddin_RibbonId";
 
-
-        private static string TabName = "Разрезы";
-        private static string TabId = "WellCalculation_RibbonId";
+        private static readonly string PanelName = "Работа со скважинами";
+        private static readonly string PanelId = "WellCalculation_RibbonPanelId";
 
         public void Initialize()
         {
@@ -58,14 +70,13 @@ namespace WellCalculations2010.AutoCAD
             
         }
 
+        //Событие для добавления вкладки в ленту
         void ComponentManager_ItemInitialized(object sender, Autodesk.Windows.RibbonItemEventArgs e)
         {
             // Проверяем, что лента загружена
             if (Autodesk.Windows.ComponentManager.Ribbon != null)
             {
-                // Строим нашу вкладку
                 BuildRibbonTab();
-                //и раз уж лента запустилась, то отключаем обработчик событий
                 Autodesk.Windows.ComponentManager.ItemInitialized -= new EventHandler<RibbonItemEventArgs> (ComponentManager_ItemInitialized);
             }
         }
@@ -73,13 +84,39 @@ namespace WellCalculations2010.AutoCAD
         void BuildRibbonTab()
         {
             // Если лента еще не загружена
-            if (!isLoaded())
+            if (getAddinRibbonTab() == null)
             {
                 // Строим вкладку
                 CreateRibbonTab();
-                // Подключаем обработчик событий изменения системных переменных
+                RibbonTab tab = getAddinRibbonTab();
+                AddContent(tab);
+                ComponentManager.Ribbon.UpdateLayout();
+                Application.SystemVariableChanged -= new Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventHandler(acadApp_SystemVariableChanged);
                 Application.SystemVariableChanged += new Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventHandler(acadApp_SystemVariableChanged);
             }
+            else
+            {
+                RibbonTab tab = getAddinRibbonTab();
+                bool isDataCreated = false;
+                foreach (RibbonPanel panel in tab.Panels)
+                {
+                    if (panel.Source.Id.Equals(PanelId) && panel.Source.Title.Equals(PanelName))
+                    {
+                        MessageBox.Show(panel.Source.Id);
+                        isDataCreated = true;
+                        break;
+                    }
+                }
+                if (!isDataCreated)
+                {
+                    AddContent(tab);
+                    ComponentManager.Ribbon.UpdateLayout();
+                    Application.SystemVariableChanged -= new Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventHandler(acadApp_SystemVariableChanged);
+                    Application.SystemVariableChanged += new Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventHandler(acadApp_SystemVariableChanged);
+                }
+            }
+            // Подключаем обработчик событий изменения системных переменных
+
         }
 
         void acadApp_SystemVariableChanged(object sender, Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventArgs e)
@@ -87,19 +124,16 @@ namespace WellCalculations2010.AutoCAD
             if (e.Name.Equals("WSCURRENT")) BuildRibbonTab();
         }
 
-        bool isLoaded()
+        RibbonTab getAddinRibbonTab()
         {
-            bool _loaded = false;
             RibbonControl ribCntrl = Autodesk.Windows.ComponentManager.Ribbon;
-            // Делаем итерацию по вкладкам ленты
             foreach (RibbonTab tab in ribCntrl.Tabs)
             {
                 // И если у вкладки совпадает идентификатор и заголовок, то значит вкладка загружена
                 if (tab.Id.Equals(TabId) & tab.Title.Equals(TabName))
-                { _loaded = true; break; }
-                else _loaded = false;
+                    return tab; 
             }
-            return _loaded;
+            return null;
         }
 
         // Создание нашей вкладки
@@ -113,13 +147,7 @@ namespace WellCalculations2010.AutoCAD
                 RibbonTab ribTab = new RibbonTab();
                 ribTab.Title = TabName; // Заголовок вкладки
                 ribTab.Id = TabId; // Идентификатор вкладки
-                ribCntrl.Tabs.Add(ribTab); // Добавляем вкладку в ленту
-                // добавляем содержимое в свою вкладку (одну панель)
-                addExampleContent(ribTab);
-                // Делаем вкладку активной (не желательно, ибо неудобно)
-                //ribTab.IsActive = true;
-                // Обновляем ленту (если делаете вкладку активной, то необязательно)
-                ribCntrl.UpdateLayout();
+                ribCntrl.Tabs.Add(ribTab);
             }
             catch (System.Exception ex)
             {
@@ -129,80 +157,71 @@ namespace WellCalculations2010.AutoCAD
         }
 
 
-        void addExampleContent(RibbonTab ribTab)
+        void AddContent(RibbonTab ribTab)
         {
             try
             {
                 // создаем panel source
                 RibbonPanelSource ribSourcePanel = new RibbonPanelSource();
-                ribSourcePanel.Title = "RibbonExample";
+                ribSourcePanel.Title = PanelName;
+                ribSourcePanel.Id = PanelId;
                 // теперь саму панель
                 RibbonPanel ribPanel = new RibbonPanel();
                 ribPanel.Source = ribSourcePanel;
                 ribTab.Panels.Add(ribPanel);
+
                 // создаем пустую tooltip (всплывающая подсказка)
                 RibbonToolTip tt;
-                // создаем split button
-                RibbonSplitButton risSplitBtn = new RibbonSplitButton();
-                /* Для RibbonSplitButton ОБЯЗАТЕЛЬНО надо указать
-                 * свойство Text, а иначе при поиске команд в автокаде
-                 * будет вылетать ошибка.
-                 */
-                risSplitBtn.Text = "RibbonSplitButton";
-                // Ориентация кнопки
-                risSplitBtn.Orientation = System.Windows.Controls.Orientation.Vertical;
-                // Размер кнопки
-                risSplitBtn.Size = RibbonItemSize.Large;
-                // Показывать изображение
-                risSplitBtn.ShowImage = true;
-                // Показывать текст
-                risSplitBtn.ShowText = true;
-                // Стиль кнопки
-                risSplitBtn.ListButtonStyle = Autodesk.Private.Windows.RibbonListButtonStyle.SplitButton;
-                risSplitBtn.ResizeStyle = RibbonItemResizeStyles.NoResize;
-                risSplitBtn.ListStyle = RibbonSplitButtonListStyle.List;
-                /* Далее создаем две кнопки и добавляем их
-                 * не в панель, а в RibbonSplitButton
-                 */
-                #region Кнопка-пример №1
+
+                #region SectionDrawer_RibButton
                 // Создаем новый экземпляр подсказки
                 tt = new RibbonToolTip();
                 // Отключаем вызов справки (в данном примере её нету)
                 tt.IsHelpEnabled = false;
                 // Создаем кнопку
-                RibbonButton ribBtn = new RibbonButton();
-                /* В свойство CommandParameter (параметры команды)
-                 * и в свойство Command (отображает команду) подсказки
-                 * пишем вызываемую команду
-                 */
-                ribBtn.CommandParameter = tt.Command = "_ррр";
-                // Имя кнопки
-                ribBtn.Name = "WellCalculation";
-                // Заголовок кнопки и подсказки
-                ribBtn.Text = tt.Title = "Построение разреза";
-                // Создаем новый (собственный) обработчик команд (см.ниже)
-                ribBtn.CommandHandler = new RibbonCommandHandler();
-                // Ориентация кнопки
-                ribBtn.Orientation = System.Windows.Controls.Orientation.Horizontal;
-                // Размер кнопки
-                ribBtn.Size = RibbonItemSize.Large;
-                /* Т.к. используем размер кнопки Large, то добавляем
-                 * большое изображение с помощью специальной функции (см.ниже)
-                 */
-                ribBtn.LargeImage = LoadImage("Image_32");
-                // Показывать картинку
-                ribBtn.ShowImage = true;
-                // Показывать текст
-                ribBtn.ShowText = true;
+                RibbonButton SectionDrawer_RibButton = new RibbonButton();
+                SectionDrawer_RibButton.CommandParameter = tt.Command = "_ррр";
+                SectionDrawer_RibButton.Name = "SectionDrawer";
+                SectionDrawer_RibButton.Text = tt.Title = "Построение разреза";
+                SectionDrawer_RibButton.CommandHandler = new RibbonCommandHandler();
+                SectionDrawer_RibButton.Orientation = System.Windows.Controls.Orientation.Horizontal;
+                SectionDrawer_RibButton.Size = RibbonItemSize.Large;
+
+                SectionDrawer_RibButton.LargeImage = LoadImage("Image_32");
+                SectionDrawer_RibButton.ShowImage = true;
+                SectionDrawer_RibButton.ShowText = true;
                 // Заполняем содержимое всплывающей подсказки
                 tt.Content = "Вызывает окно ввода данных для отрисовки разреза";
                 // Подключаем подсказку к кнопке
-                ribBtn.ToolTip = tt;
+                SectionDrawer_RibButton.ToolTip = tt;
                 // Добавляем кнопку в RibbonSplitButton
-                ribSourcePanel.Items.Add(ribBtn);
+                ribSourcePanel.Items.Add(SectionDrawer_RibButton);
                 #endregion
-                // Делаем текущей первую кнопку
-                risSplitBtn.Current = ribBtn;
+                #region WellPlanarImport_RibButton
+                // Создаем новый экземпляр подсказки
+                tt = new RibbonToolTip();
+                // Отключаем вызов справки (в данном примере её нету)
+                tt.IsHelpEnabled = false;
+                // Создаем кнопку
+                RibbonButton WellPlanarImport_RibButton = new RibbonButton();
+                WellPlanarImport_RibButton.CommandParameter = tt.Command = "_ИмпортСкважин";
+                WellPlanarImport_RibButton.Name = "WellPlanarImport";
+                WellPlanarImport_RibButton.Text = tt.Title = "Импорт скважин";
+                WellPlanarImport_RibButton.CommandHandler = new RibbonCommandHandler();
+                WellPlanarImport_RibButton.Orientation = System.Windows.Controls.Orientation.Horizontal;
+                WellPlanarImport_RibButton.Size = RibbonItemSize.Large;
+
+                WellPlanarImport_RibButton.LargeImage = LoadImage("Image_32");
+                WellPlanarImport_RibButton.ShowImage = true;
+                WellPlanarImport_RibButton.ShowText = true;
+                // Заполняем содержимое всплывающей подсказки
+                tt.Content = "Вызывает окно ввода данных для импорта скважин на план";
+                // Подключаем подсказку к кнопке
+                WellPlanarImport_RibButton.ToolTip = tt;
+                // Добавляем кнопку в RibbonSplitButton
+                ribSourcePanel.Items.Add(WellPlanarImport_RibButton);
+                #endregion
+
             }
             catch (System.Exception ex)
             {
@@ -216,11 +235,12 @@ namespace WellCalculations2010.AutoCAD
             return new System.Windows.Media.Imaging.BitmapImage(
                 new Uri("pack://application:,,,/WellCalculations2010;component/" + ImageName + ".png"));
         }
+        
+        
+        
         /* Собственный обраотчик команд
          * Это один из вариантов вызова команды по нажатию кнопки
          */
-
-
         class RibbonCommandHandler : System.Windows.Input.ICommand
         {
             public bool CanExecute(object parameter)

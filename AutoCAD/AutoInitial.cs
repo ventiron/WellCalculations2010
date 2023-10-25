@@ -86,39 +86,26 @@ namespace TriangulationAutoCAD
         #endregion
 
         #region [CreateMtext]
-        public static MText CreateMtext(String content, Point3d location, byte color = 0, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.TopLeft)
+        public static MText CreateMtext(string content, Point3d location, byte color = 0, double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.TopLeft)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.ColorIndex = color <= 0 ? text.ColorIndex : color;
             text.Attachment = atPoint;
+            text.LineSpaceDistance = lineSpacing == 0d ? text.LineSpaceDistance : lineSpacing;
 
             return text;
         }
-        public static MText CreateMtext(String content, Point3d location, byte color = 0, double textDistance = 0d, double textHeight = 0d, double rotation = 0, double lineSpacing = 0d, AttachmentPoint atPoint = AttachmentPoint.TopLeft)
+        public static MText CreateMtext(string content, Point3d location, Color color, double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
-            text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
-            text.Rotation = rotation;
-            text.ColorIndex = color <= 0 ? text.ColorIndex : color;
-            text.Attachment = atPoint;
-            text.LineSpaceDistance = lineSpacing;
-
-            return text;
-        }
-        public static MText CreateMtext(String content, Point3d location, Color color, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
-        {
-            MText text = new MText();
-            text.SetDatabaseDefaults();
-            text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.Color = color;
@@ -126,26 +113,26 @@ namespace TriangulationAutoCAD
 
             return text;
         }
-        public static MText CreateMtext(String content, Point3d location, LayerTableRecord layer, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
+        public static MText CreateMtext(string content, Point3d location, LayerTableRecord layer,  double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.Layer = layer.Name;
             text.Attachment = atPoint;
-            
+
 
             return text;
         }
-        public static MText CreateMtext(Matrix3d matrix, String content, Point3d location, byte color = 0, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
+        public static MText CreateMtext(Matrix3d matrix, string content, Point3d location, byte color = 0, double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.ColorIndex = color <= 0 ? text.ColorIndex : color;
@@ -154,12 +141,12 @@ namespace TriangulationAutoCAD
 
             return text;
         }
-        public static MText CreateMtext(Matrix3d matrix, String content, Point3d location, Color color, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
+        public static MText CreateMtext(Matrix3d matrix, string content, Point3d location, Color color, double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.Color = color;
@@ -168,12 +155,12 @@ namespace TriangulationAutoCAD
 
             return text;
         }
-        public static MText CreateMtext(Matrix3d matrix, String content, Point3d location, LayerTableRecord layer, double textDistance = 0d, double textHeight = 0d, double rotation = 0, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
+        public static MText CreateMtext(Matrix3d matrix, string content, Point3d location, LayerTableRecord layer, double textHeight = 0d, double rotation = 0, double lineSpacing = 1d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
+            text.Location = location;
             text.Contents = content;
-            text.Location = textDistance == 0d ? location : new Point3d(location.X + textDistance, location.Y, location.Z);
             text.TextHeight = textHeight == 0d ? text.TextHeight : textHeight;
             text.Rotation = rotation;
             text.Layer = layer.Name;
@@ -210,6 +197,34 @@ namespace TriangulationAutoCAD
             point.SetDatabaseDefaults();
             point.TransformBy(matrix);
             return point;
+        }
+        #endregion
+
+        #region [CreateCircle]
+        public static Circle CreateCircle(Point3d point)
+        {
+            Circle circle = new Circle();
+            circle.Center = point;
+            circle.Radius = 1.0d;
+            circle.SetDatabaseDefaults();
+            return circle;
+        }
+        public static Circle CreateCircle(Point3d point, double radius)
+        {
+            Circle circle = new Circle();
+            circle.Center = point;
+            circle.Radius = radius;
+            circle.SetDatabaseDefaults();
+            return circle;
+        }
+        public static Circle CreateCircle(Point3d point, Vector3d vector, double radius)
+        {
+            Circle circle = new Circle();
+            circle.Center = point;
+            circle.Radius = radius;
+            circle.Normal = vector;
+            circle.SetDatabaseDefaults();
+            return circle;
         }
         #endregion
         // Отрисовывает любые доступные для этого объекты

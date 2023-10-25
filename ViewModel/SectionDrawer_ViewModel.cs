@@ -22,7 +22,7 @@ using ClosedXML.Excel;
 
 namespace WellCalculations2010.ViewModel
 {
-    internal class MainViewModel
+    internal class SectionDrawer_ViewModel : INotifyPropertyChanged
     {
         
         public static ObservableCollection<string> Scales { get; set; }
@@ -98,7 +98,7 @@ namespace WellCalculations2010.ViewModel
                 OnPropertyChanged("GoldContentIsBottom");
             }
         }
-        public MainViewModel()
+        public SectionDrawer_ViewModel()
         {
             Scales = new ObservableCollection<string>
             {
@@ -298,15 +298,7 @@ namespace WellCalculations2010.ViewModel
                             fileDialog.CheckPathExists = true;
                             if (fileDialog.ShowDialog() == true)
                             {
-                                using (FileStream fs = new FileStream(fileDialog.FileName, FileMode.Create))
-                                {
-                                    using (StreamWriter writer = new StreamWriter(fs, Encoding.GetEncoding(1251)))
-                                    {
-                                        
-                                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section));
-                                        xmlSerializer.Serialize(writer, section);
-                                    }
-                                }
+                                section.SaveSection(fileDialog.FileName);
                             }
                         }
                         catch(Exception ex)
@@ -337,11 +329,7 @@ namespace WellCalculations2010.ViewModel
                             fileDialog.CheckPathExists = true;
                             if (fileDialog.ShowDialog() == true)
                             {
-                                using (StreamReader fs = new StreamReader(fileDialog.FileName, Encoding.GetEncoding(1251)))
-                                {
-                                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section));
-                                    section = (Section)xmlSerializer.Deserialize(fs);
-                                }
+                                section = Section.LoadSection(fileDialog.FileName);
                                 Wells.Clear();
                                 foreach (Well well in section.Wells) Wells.Add(well);
                             }
@@ -375,7 +363,7 @@ namespace WellCalculations2010.ViewModel
                         if (true)
                         {
                             ((Window)obj).WindowState = WindowState.Minimized;
-                            WellDrawer.DrawSection(section);
+                            SectionDrawer.DrawSection(section);
                             return;
                         }
 
@@ -400,50 +388,50 @@ namespace WellCalculations2010.ViewModel
 
 
 
-        private SimpleCommand loadFromExcel;
-        public SimpleCommand LoadFromExcel
-        {
-            get
-            {
-                return loadFromExcel == null ?
-                    (loadFromExcel = new SimpleCommand(obj =>
-                    {
-                        try
-                        {
-                            OpenFileDialog fileDialog = new OpenFileDialog();
-                            fileDialog.Filter = "Файл Excel (.xlsx)|*.xlsx";
-                            fileDialog.CheckFileExists = true;
-                            fileDialog.CheckPathExists = true;
-                            if (fileDialog.ShowDialog() == true)
-                            {
-                                XLWorkbook wb = new XLWorkbook(fileDialog.FileName);
-                                IXLWorksheet worksheet = wb.Worksheets.Worksheet("Скважины");
-                                IXLTable table = worksheet.Table("Well");
-                                IXLTableRows rows = table.DataRange.Rows();
+        //private SimpleCommand loadFromExcel;
+        //public SimpleCommand LoadFromExcel
+        //{
+        //    get
+        //    {
+        //        return loadFromExcel == null ?
+        //            (loadFromExcel = new SimpleCommand(obj =>
+        //            {
+        //                try
+        //                {
+        //                    OpenFileDialog fileDialog = new OpenFileDialog();
+        //                    fileDialog.Filter = "Файл Excel (.xlsx)|*.xlsx";
+        //                    fileDialog.CheckFileExists = true;
+        //                    fileDialog.CheckPathExists = true;
+        //                    if (fileDialog.ShowDialog() == true)
+        //                    {
+        //                        XLWorkbook wb = new XLWorkbook(fileDialog.FileName);
+        //                        IXLWorksheet worksheet = wb.Worksheets.Worksheet("Скважины");
+        //                        IXLTable table = worksheet.Table("Well");
+        //                        IXLTableRows rows = table.DataRange.Rows();
 
-                                ObservableCollection<Well> newWells = new ObservableCollection<Well>();
-                                foreach(IXLTableRow row in rows)
-                                {
-                                    Well well = new Well();
-                                    well.WellName = row.Cell(2).GetValue<string>();
-                                    newWells.Add(well);
-                                }
+        //                        ObservableCollection<Well> newWells = new ObservableCollection<Well>();
+        //                        foreach(IXLTableRow row in rows)
+        //                        {
+        //                            Well well = new Well();
+        //                            well.WellName = row.Cell(2).GetValue<string>();
+        //                            newWells.Add(well);
+        //                        }
 
-                                StringBuilder sb = new StringBuilder();
-                                foreach (Well well1 in newWells)
-                                    sb.Append(well1.WellName);
-                                MessageBox.Show(sb.ToString() + "\n");
+        //                        StringBuilder sb = new StringBuilder();
+        //                        foreach (Well well1 in newWells)
+        //                            sb.Append(well1.WellName);
+        //                        MessageBox.Show(sb.ToString() + "\n");
 
-                                wb.Save();
+        //                        wb.Save();
 
-                            }
-                        } catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message);
-                        }
-                    })) : loadFromExcel;
-            }
-        }
+        //                    }
+        //                } catch (Exception ex)
+        //                {
+        //                    MessageBox.Show(ex.Message);
+        //                }
+        //            })) : loadFromExcel;
+        //    }
+        //}
 
 
 
@@ -485,51 +473,51 @@ namespace WellCalculations2010.ViewModel
             return true;
         }
 
-        private static ObservableCollection<Well> CreateRandomData(int counter)
-        {
-            double wellHeight = 100;
-            double wellDepth = 10;
-            double distNext = 20;
+        //private static ObservableCollection<Well> CreateRandomData(int counter)
+        //{
+        //    double wellHeight = 100;
+        //    double wellDepth = 10;
+        //    double distNext = 20;
 
-            string tag1 = "1";
-            string tag2 = "2";
-            string tag3 = "3";
+        //    string tag1 = "1";
+        //    string tag2 = "2";
+        //    string tag3 = "3";
 
-            Random Rand = new Random();
+        //    Random Rand = new Random();
 
-            ObservableCollection<Well> data = new ObservableCollection<Well>();
-            for(int i = 0 ; i < counter; i++)
-            {
-                Well well = new Well();
+        //    ObservableCollection<Well> data = new ObservableCollection<Well>();
+        //    for(int i = 0 ; i < counter; i++)
+        //    {
+        //        Well well = new Well();
 
-                
 
-                wellHeight += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : - Rand.NextDouble() * 5;
-                wellDepth += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : - Rand.NextDouble() * 5;
-                distNext += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : -Rand.NextDouble() * 5;
 
-                if (wellDepth < 5) wellDepth += 50;
-                if (distNext < 5) distNext += 30;
+        //        wellHeight += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : - Rand.NextDouble() * 5;
+        //        wellDepth += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : - Rand.NextDouble() * 5;
+        //        distNext += Rand.Next(-2, 2) >= 0 ? Rand.NextDouble() * 5 : -Rand.NextDouble() * 5;
 
-                if (wellDepth > 50) wellDepth -= 30;
-                if (distNext > 50) distNext -= 30;
+        //        if (wellDepth < 5) wellDepth += 50;
+        //        if (distNext < 5) distNext += 30;
 
-                well.WellName = i.ToString();
-                well.WellHeight = wellHeight;
-                well.WellDepth = wellDepth;
-                well.DistanceToNextWell = distNext;
+        //        if (wellDepth > 50) wellDepth -= 30;
+        //        if (distNext > 50) distNext -= 30;
 
-                well.EarthDatas.Add(new EarthData(Rand.Next((int)wellDepth/2), tag1));
+        //        well.WellName = i.ToString();
+        //        well.WellHeight = wellHeight;
+        //        well.WellDepth = wellDepth;
+        //        well.DistanceToNextWell = distNext;
 
-                if (Rand.Next(1) == 1)
-                {
-                    well.EarthDatas.Add(new EarthData(Rand.Next((int)wellDepth / 3, (int)wellDepth), tag2));
-                }
+        //        well.EarthDatas.Add(new EarthData(Rand.Next((int)wellDepth/2), tag1));
 
-                data.Add(well);
-            }
-            return data;
-        }
+        //        if (Rand.Next(1) == 1)
+        //        {
+        //            well.EarthDatas.Add(new EarthData(Rand.Next((int)wellDepth / 3, (int)wellDepth), tag2));
+        //        }
+
+        //        data.Add(well);
+        //    }
+        //    return data;
+        //}
     }
 
 }

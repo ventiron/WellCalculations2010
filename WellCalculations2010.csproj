@@ -16,6 +16,7 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AcCui">
@@ -63,8 +66,13 @@
       <HintPath>packages\DocumentFormat.OpenXml.1.0\lib\DocumentFormat.OpenXml.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MathModule, Version=1.0.0.0, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Misc\MathModule\MathModule\bin\Release\MathModule.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -74,30 +82,37 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoCAD\WellDrawer.cs" />
+    <Compile Include="AutoCAD\SectionDrawer.cs" />
+    <Compile Include="AutoCAD\WellPlanarDrawer.cs" />
     <Compile Include="Converter\IsOddConverter.cs" />
     <Compile Include="Converter\PlusOneConverter.cs" />
     <Compile Include="Converter\RowNumberConverter.cs" />
-    <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="Model\EarthData.cs" />
+    <Compile Include="Model\GoldData.cs" />
+    <Compile Include="Model\GoldLayer.cs" />
+    <Compile Include="Model\Point.cs" />
+    <Compile Include="Model\Section.cs" />
+    <Compile Include="ViewModel\SectionDrawer_ViewModel.cs" />
     <Compile Include="Model\Well.cs" />
-    <Page Include="View\LabeledTextBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\MainWindow.xaml">
+    <Compile Include="ViewModel\WellPlanarImport_ViewModel.cs" />
+    <Compile Include="View\WellPlanarImport_Window.xaml.cs">
+      <DependentUpon>WellPlanarImport_Window.xaml</DependentUpon>
+    </Compile>
+    <Page Include="View\SectionDrawer_Window.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="AutoCAD\AutoCAD_Commands.cs" />
     <Compile Include="AutoCAD\AutoInitial.cs" />
     <Compile Include="Commands\SimpleCommand.cs" />
-    <Compile Include="View\LabeledTextBox.xaml.cs">
-      <DependentUpon>LabeledTextBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="View\SectionDrawer_Window.xaml.cs">
+      <DependentUpon>SectionDrawer_Window.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\WellPlanarImport_Window.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

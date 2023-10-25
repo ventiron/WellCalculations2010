@@ -9,17 +9,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace WellCalculations2010.View
 {
     /// <summary>
-    /// Логика взаимодействия для UserControl1.xaml
+    /// Логика взаимодействия для WellPlanarImport_Window.xaml
     /// </summary>
-    public partial class WellCalculations_MainWindow : Window
+    public partial class WellPlanarImport_Window : Window
     {
-        public WellCalculations_MainWindow()
+        public WellPlanarImport_Window()
         {
             InitializeComponent();
         }
