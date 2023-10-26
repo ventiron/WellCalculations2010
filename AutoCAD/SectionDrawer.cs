@@ -74,7 +74,6 @@ namespace WellCalculations2010.AutoCAD
                 return;
             }
             Point3d basePoint = ppr.Value;
-
             try
             {
                 //Блочим документ потому что так надо
@@ -678,8 +677,8 @@ namespace WellCalculations2010.AutoCAD
                     if (((minHeight + vertScaleStep * i) % (vertScaleStep * 5.0)) == 0.0)
                     {
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(ApplyAutoCADFont($"{minHeight + vertScaleStep * i}"),
-                            new Point3d(basePoint.X - VertScaleTextDist, basePoint.Y + VertScaleHeight * i, 0), 
-                            textHeight: VertScaleTextFontSize, atPoint: AttachmentPoint.MiddleRight));
+                            new Point3d(basePoint.X - VertScaleTextDist, basePoint.Y + VertScaleHeight * i, 0),
+                             textHeight: VertScaleTextFontSize, atPoint: AttachmentPoint.MiddleRight));
                     }
                 }
                 tr.Commit();

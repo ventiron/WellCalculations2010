@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Xml.Serialization;
+using MathModule;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using MathModule.Primitives;
 
 namespace WellCalculations2010.Model
 {
@@ -30,7 +34,7 @@ namespace WellCalculations2010.Model
             {
                 using (StreamReader fs = new StreamReader(path, Encoding.GetEncoding(1251)))
                 {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section));
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section),new Type[] {typeof(MathPoint), typeof(Point3d), typeof(PolylineVertex3d)});
 
 
 
@@ -43,6 +47,7 @@ namespace WellCalculations2010.Model
                             sec.WellHeadPoint.Z = double.Parse(e.Element.InnerText);
                         }
                     };
+
 
 
 

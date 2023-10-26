@@ -3,11 +3,14 @@ using Autodesk.AutoCAD.Geometry;
 using MathModule.Primitives;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace WellCalculations2010.Model
 {
+    [Serializable]
     public class Point : ICloneable
     {
         public string Id;
@@ -32,7 +35,7 @@ namespace WellCalculations2010.Model
             this.X = X;
             this.Y = Y;
             this.Z = Z;
-        }      
+        }
 
         public static implicit operator Point3d(Point point)
         {

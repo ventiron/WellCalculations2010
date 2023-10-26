@@ -15,15 +15,36 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <converter:LayerAndWellConverter x:Key="LayerAndWellConverter"/>
         <Style TargetType="TextBox">
             <Setter Property="Control.Height" Value="23"/>
             <Setter Property="Control.FontSize" Value="14"/>
             <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
         </Style>
-        <Style x:Key="SettingsTextBlock">
+        <Style TargetType="TextBlock">
             <Setter Property="Control.Height" Value="20"/>
             <Setter Property="Control.FontSize" Value="14"/>
             <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+
+            <Setter Property="Padding" Value="0"/>
+            
+
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Trigger>
+            </Style.Triggers>
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FFF6F9FF"/>
+            </Style.Resources>
+
         </Style>
     </Window.Resources>
 
@@ -33,7 +54,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100"/>
                     <RowDefinition Height="1*"/>
-                    <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0">
@@ -59,22 +79,34 @@
 
                 <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="24"/>
                         <RowDefinition/>
-                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
 
                     <!--Заголовки столбцов-->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="33"/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="11"/>
                         </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="1" Text="№ скважины" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="Глуб. скважины" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="3" Text="X" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="4" Text="Y" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="5" Text="Z" HorizontalAlignment="Center"/>
                     </Grid>
 
-                    <ListBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding wells}">
+                    <ListBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding wells}"
+                             SelectedIndex="0">
+                        
+                        <!--Главный ListBox для всего списка скважин-->
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Expander IsExpanded="True" HorizontalContentAlignment="Stretch">
@@ -88,7 +120,7 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            
+
                                             <TextBox Grid.Column="0" Text="{Binding WellName}"/>
                                             <TextBox Grid.Column="1" Text="{Binding WellDepth}"/>
                                             <TextBox Grid.Column="2" Text="{Binding WellHeadPoint.X}"/>
@@ -103,40 +135,62 @@
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
+                                            <RowDefinition Height="24"/>
                                             <RowDefinition/>
                                             <RowDefinition Height="24"/>
                                         </Grid.RowDefinitions>
+                                        <!--Подписи к столбцам пластов-->
+                                        <Grid Grid.Row="0" Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <ListBox Grid.Column="1" 
+                                            <TextBlock Grid.Column="0" Text="№ (название) слоя" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="глубина слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="2" Text="Ср. сод. слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Text="мощность слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                        </Grid>
+
+
+                                        <!--Сами пласты-->
+                                        <ListBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
                                              HorizontalContentAlignment="Stretch" ItemsSource="{Binding GoldLayers}" BorderBrush="Transparent">
-                                            <ListBox.ItemContainerStyle>
-                                                <Style TargetType="{x:Type ListBoxItem}">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                                                <ContentPresenter/>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </ListBox.ItemContainerStyle>
+
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <Grid HorizontalAlignment="Stretch">
                                                         <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="58"/>
+                                                            <ColumnDefinition/>
                                                             <ColumnDefinition/>
                                                             <ColumnDefinition/>
                                                             <ColumnDefinition/>
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBox Grid.Column="0" Text="{Binding depth}"/>
-                                                        <TextBox Grid.Column="1" Text="{Binding goldContent}"/>
-                                                        <TextBox Grid.Column="2" Text="{Binding thickness}"/>
+
+                                                        <Button Grid.Column="0" Grid.Row="1" Content="-" FontSize="20" VerticalContentAlignment="Center" Padding="0" 
+                                                                Background="Transparent" BorderBrush="Transparent"
+                                                                Command="{Binding DataContext.DeleteGoldLayer, RelativeSource={RelativeSource AncestorType=Window}}">
+                                                            <Button.CommandParameter>
+                                                                <MultiBinding Converter="{StaticResource LayerAndWellConverter}">
+                                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=ListBoxItem, AncestorLevel=2}"/>
+                                                                    <Binding Path="DataContext" RelativeSource="{x:Static RelativeSource.Self}"/>
+                                                                </MultiBinding>
+                                                            </Button.CommandParameter>
+                                                        </Button>
+
+                                                        <TextBox Grid.Column="1" Text="{Binding layerName}"/>
+                                                        <TextBox Grid.Column="2" Text="{Binding depth}"/>
+                                                        <TextBox Grid.Column="3" Text="{Binding goldContent}"/>
+                                                        <TextBox Grid.Column="4" Text="{Binding thickness}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
                                         </ListBox>
                                         <!--Кнопка добавления данных по пластам-->
-                                        <Button Grid.Column="1" Grid.Row="1" Content="+" FontSize="14" VerticalContentAlignment="Center" Padding="0" 
+                                        <Button Grid.Column="1" Grid.Row="2" Content="+" FontSize="14" VerticalContentAlignment="Center" Padding="0" 
                                                 Command="{Binding DataContext.AddGoldLayer, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}"/>
                                     </Grid>
@@ -147,18 +201,43 @@
                     <Button Grid.Row="2" Content="+" FontSize="14" VerticalContentAlignment="Center" Padding="0" 
                         Command="{Binding AddWell}"/>
                 </Grid>
-
-                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                    <TextBlock Text="Обнаружено точек: "/>
-                    <TextBlock Text="{Binding AllPoints.Count}"/>
-                    <TextBlock Text=" Ошибок: "/>
-                    <TextBlock Text="{Binding ErrCounter, TargetNullValue='',
-                        NotifyOnSourceUpdated=True,  UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
             </Grid>
         </TabItem>
         <TabItem Header="Настройки">
-            
+            <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+
+
+                <GroupBox Grid.Row="0" Grid.Column="0" Header="Настройки скважин">
+                    <StackPanel>
+                        <TextBlock Text="Размер метки скважины" />
+                        <TextBox Text="{Binding WellMarkSize, Source={x:Static properties:Settings.Default}}"/>
+                        <TextBlock Text="Расстояние от метки до текста"/>
+                        <TextBox Text="{Binding PlanarTextDistFromMark, Source={x:Static properties:Settings.Default}}"/>
+                        <TextBlock Text="Размер текста"/>
+                        <TextBox Text="{Binding WellPlanarTextSize, Source={x:Static properties:Settings.Default}}"/>
+                    </StackPanel>
+                </GroupBox>
+            <GroupBox Grid.Row="0" Grid.Column="1" Header="Шкалы высот">
+                    
+                </GroupBox>
+            <GroupBox Grid.Row="1" Grid.Column="0" Header="">
+                <StackPanel>
+                    
+                </StackPanel>
+            </GroupBox>
+
+            <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Left" Margin="309,5,0,0" Grid.Row="2" VerticalAlignment="Top" Command="{Binding SaveSettings}"/>
+
+            </Grid>
         </TabItem>
     </TabControl>
 </Window>

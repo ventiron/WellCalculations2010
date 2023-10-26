@@ -54,6 +54,29 @@ namespace WellCalculations2010.ViewModel
             }
         }
 
+        private SimpleCommand deleteGoldLayer;
+        public SimpleCommand DeleteGoldLayer
+        {
+            get
+            {
+                return deleteGoldLayer == null ? (deleteGoldLayer = new SimpleCommand(obj =>
+                {
+                    try
+                    {
+                        object[] prop = (object[])obj;
+
+                        Well well = (Well)prop[0];
+                        GoldLayer layer = (GoldLayer)prop[1];
+                        well.GoldLayers.Remove(layer);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                })) : deleteGoldLayer;
+            }
+        }
+
         private SimpleCommand addWell;
         public SimpleCommand AddWell
         {

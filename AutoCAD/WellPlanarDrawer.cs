@@ -70,7 +70,6 @@ namespace WellCalculations2010.AutoCAD
 
             AutoInitial.Initialize(tr, btr, AutoInitial.CreateCircle(well.WellHeadPoint, Settings.Default.WellMarkSize));
 
-           
             //Текст сверху с названием скважины
             AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, well.WellName,
                 new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y + textDist, well.WellHeadPoint.Z),
@@ -80,31 +79,36 @@ namespace WellCalculations2010.AutoCAD
                 new Point3d(well.WellHeadPoint.X - textDist, well.WellHeadPoint.Y + Settings.Default.WellPlanarTextSize * 0.55, well.WellHeadPoint.Z),
                 textHeight: textSize, atPoint: AttachmentPoint.MiddleRight));
             //Текст слева с глубиной скважины
-            AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, SectionDrawer.ApplyAutoCADFont(well.WellDepth.ToString("0.0").Replace('.', ',')), 
+            AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, SectionDrawer.ApplyAutoCADFont(well.WellDepth.ToString("0.0").Replace('.', ',')),
                 new Point3d(well.WellHeadPoint.X - textDist, well.WellHeadPoint.Y - Settings.Default.WellPlanarTextSize * 0.55, well.WellHeadPoint.Z),
                 textHeight: textSize, atPoint: AttachmentPoint.MiddleRight));
 
             double TextSizeToDistMod = 3.3333;
             double dist = 0;
 
-            foreach(GoldLayer layer in well.GoldLayers)
+            foreach (GoldLayer layer in well.GoldLayers)
             {
+                //Текст с глубиной слоя
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, SectionDrawer.ApplyAutoCADFont(layer.depth.ToString("0.0").Replace('.', ',')),
                     new Point3d(well.WellHeadPoint.X + textDist + dist, well.WellHeadPoint.Y + Settings.Default.WellPlanarTextSize * 1.05, well.WellHeadPoint.Z),
                     textHeight: textSize, atPoint: AttachmentPoint.MiddleLeft));
+                //Текст с содержанием по слою
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, SectionDrawer.ApplyAutoCADFont(layer.goldContent),
                     new Point3d(well.WellHeadPoint.X + textDist + dist, well.WellHeadPoint.Y, well.WellHeadPoint.Z),
                     textHeight: textSize, atPoint: AttachmentPoint.MiddleLeft));
+                //Текст с мощностью слоя
                 AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(rotationMatrix, SectionDrawer.ApplyAutoCADFont(layer.thickness.ToString("0.0").Replace('.', ',')),
                     new Point3d(well.WellHeadPoint.X + textDist + dist, well.WellHeadPoint.Y - Settings.Default.WellPlanarTextSize * 1.05, well.WellHeadPoint.Z),
                     textHeight: textSize, atPoint: AttachmentPoint.MiddleLeft));
+
+
                 dist += Settings.Default.WellPlanarTextSize * TextSizeToDistMod;
             }
         }
 
         private static void CalculateRotation(Point p1, Point p2)
         {
-            rotation = BMF.AngleByCoordinates_UnClockwise(new Point(p1.Y,p1.X,p1.Z), new Point(p2.Y, p2.X, p2.Z));
+            rotation = BMF.AngleByCoordinates_UnClockwise(new Point(p1.Y, p1.X, p1.Z), new Point(p2.Y, p2.X, p2.Z));
         }
     }
 }

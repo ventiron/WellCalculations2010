@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using WellCalculations2010.ViewModel;
 
+
+
 namespace WellCalculations2010.Model
 {
 
