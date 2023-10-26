@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Ribbon;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +21,7 @@ using WellCalculations2010.Model;
 using WellCalculations2010.View;
 
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
-
+using Section = WellCalculations2010.Model.Section;
 
 namespace WellCalculations2010.AutoCAD
 {
@@ -51,6 +52,40 @@ namespace WellCalculations2010.AutoCAD
                 _WellPlanarImport_Window.WindowState = System.Windows.WindowState.Normal;
             else
                _WellPlanarImport_Window.Show();
+        }
+        [CommandMethod("ПолОтр")]
+        public void FullDraw()
+        {
+            try
+            {
+                Section section = new Section();
+
+                OpenFileDialog fileDialog = new OpenFileDialog();
+                fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                fileDialog.CheckFileExists = false;
+                fileDialog.CheckPathExists = true;
+                fileDialog.Multiselect = true;
+                if (fileDialog.ShowDialog() == true)
+                {
+                    if(fileDialog.FileNames.Length > 1)
+                    {
+                        List<Section> sections = new List<Section>();
+                        foreach (string file in fileDialog.FileNames)
+                        {
+                            section = Section.LoadSection(file);
+                            sections.Add(section);
+                        }
+                        SectionDrawer3d.DrawSectionModel(sections);
+                        return;
+                    }
+                    section = Section.LoadSection(fileDialog.FileName);
+                    SectionDrawer3d.DrawSection(section);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
 

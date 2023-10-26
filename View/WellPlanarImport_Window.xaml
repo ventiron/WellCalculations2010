@@ -64,6 +64,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
+                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
                     <!--Выбор шаблона--><!--
@@ -73,8 +74,9 @@
                     </StackPanel>-->
                     
                     <!--Кнопки прочитки файла и отрисовки-->
-                    <!--<Button Grid.Column="0" Grid.Row="1" Content="Считать из файла" Command="{Binding LoadAndBreakFile}"/>-->
-                    <Button Grid.Column="1" Grid.Row="1" Content="Отрисовать" Command="{Binding ImportWells}" CommandParameter="{Binding ElementName=WellPlanarImport_MainWindow}"/>
+                    <Button Grid.Column="0" Grid.Row="1" Content="Сохранить" Command="{Binding SaveSegment}"/>
+                    <Button Grid.Column="1" Grid.Row="1" Content="Считать из файла" Command="{Binding LoadSegment}"/>
+                    <Button Grid.Column="2" Grid.Row="1" Content="Отрисовать" Command="{Binding ImportWells}" CommandParameter="{Binding ElementName=WellPlanarImport_MainWindow}"/>
                 </Grid>
 
                 <Grid Grid.Row="1">
@@ -103,7 +105,7 @@
                         <TextBlock Grid.Column="5" Text="Z" HorizontalAlignment="Center"/>
                     </Grid>
 
-                    <ListBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding wells}"
+                    <ListBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Wells}"
                              SelectedIndex="0">
                         
                         <!--Главный ListBox для всего списка скважин-->

@@ -18,7 +18,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace WellCalculations2010.AutoCAD
 {
-    internal class SectionDrawer
+    internal class SectionDrawer2d
     {
         private static double vertScale;
         private static double horScale;
@@ -159,17 +159,13 @@ namespace WellCalculations2010.AutoCAD
 
                 //Основной цикл отрисовки
                 double currentDist = 0;
-                List<Point3d> InterpolatedPoints = new List<Point3d>();
-                Point3dCollection surfacePoints = new Point3dCollection();
+                
                 for (int i = 0; i < section.Wells.Count; i++)
                 {
                     Well well = section.Wells[i];
 
                     // Первая точка сплайна поверхности
-                    if (i == 0)
-                    {
-                        surfacePoints.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
-                    }
+                    
 
                     //Отрисовываем скважину
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
@@ -189,23 +185,12 @@ namespace WellCalculations2010.AutoCAD
                         textHeight: textHeight, atPoint: AttachmentPoint.TopCenter));
 
 
-                    //Отрисовываем сплайн поверхности
-                    InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
-                    if (i == section.Wells.Count - 1)
-                        InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
+                    
                     //Увеличиваем расстояние до скважины
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
                 }
-                Spline surface = new Spline(surfacePoints, 5, 0.0);
-                surface.ColorIndex = 42;
-                surface.LineWeight = LineWeight.LineWeight015;
-                AutoInitial.Initialize(tr, btr, surface);
 
-                Spline surfaceTemp = CreateSplineCopyByY(surface, 2);
-                AutoInitial.Initialize(tr, btr, surfaceTemp);
-                HatchTwoSplines(surface, surfaceTemp, "EARTH", 0.4, 40);
-                surfaceTemp.Erase();
 
 
 
@@ -297,13 +282,18 @@ namespace WellCalculations2010.AutoCAD
                 BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
                 BlockTableRecord btr = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
 
-                List<Point3d> InterpolatedPoints = new List<Point3d>();
+                Point3dCollection surfacePoints = new Point3dCollection();
                 List<String> earthDatas = new List<String>();
                 double currentDist = 0;
 
                 for (int i = 0; i < section.Wells.Count; i++)
                 {
                     Well well = section.Wells[i];
+
+                    if (i == 0)
+                    {
+                        surfacePoints.Add(new Point3d(basePoint.X + distFromScale / 2, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
+                    }
 
                     //Отрисовываем породы
                     foreach (EarthData earthData in well.EarthDatas)
@@ -377,10 +367,26 @@ namespace WellCalculations2010.AutoCAD
                                 AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
                         }
                     }
+
+                    //Отрисовываем сплайн поверхности
+                    InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
+                    if (i == section.Wells.Count - 1)
+                        InterpolateAndAddPoint(surfacePoints, new Point3d(basePoint.X + distFromScale * 1.5 + currentDist, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z), 0));
+
                     //Увеличиваем расстояние до скважины
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
                 }
+
+                Spline surface = new Spline(surfacePoints, 5, 0.0);
+                surface.ColorIndex = 42;
+                surface.LineWeight = LineWeight.LineWeight015;
+                AutoInitial.Initialize(tr, btr, surface);
+
+                Spline surfaceTemp = CreateSplineCopyByY(surface, 2);
+                AutoInitial.Initialize(tr, btr, surfaceTemp);
+                HatchTwoSplines(surface, surfaceTemp, "EARTH", 0.4, 40);
+                surfaceTemp.Erase();
 
                 tr.Commit();
             }
@@ -881,12 +887,13 @@ namespace WellCalculations2010.AutoCAD
 
             double dX = (secondPoint.X - firstPoint.X) / dist;
             double dY = (secondPoint.Y - firstPoint.Y) / dist;
+            double dZ = (secondPoint.Z - firstPoint.Z) / dist;
 
             dist = dist / (numberOfPoints + 1);
 
             for (int i = 1; i <= numberOfPoints; i++)
             {
-                result.Add(new Point3d(firstPoint.X + dX * dist * i, firstPoint.Y + dY * dist * i, 0));
+                result.Add(new Point3d(firstPoint.X + dX * dist * i, firstPoint.Y + dY * dist * i, firstPoint.Z + dZ * dist * i));
             }
             return result;
         }

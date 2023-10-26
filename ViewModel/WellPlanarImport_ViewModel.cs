@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,22 +16,12 @@ namespace WellCalculations2010.ViewModel
 {
     internal class WellPlanarImport_ViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Well> wells { get; set; }
+        public ObservableCollection<Well> Wells { get; set; }
 
 
         public WellPlanarImport_ViewModel()
         {
-            wells = new ObservableCollection<Well>()
-            {
-                new Well(),
-                new Well()
-            };
-
-            wells[0].GoldLayers.Add(new GoldLayer("2",2,2));
-            wells[0].WellHeadPoint = new Point(1, 2, 3);
-
-            wells[1].GoldLayers.Add(new GoldLayer("4", 1, 3));
-            wells[1].WellHeadPoint = new Point(15, 6, 1);
+            Wells = new ObservableCollection<Well>();
         }
 
         #region PropertyChanged
@@ -85,7 +76,7 @@ namespace WellCalculations2010.ViewModel
                 return addWell == null ? (addWell = new SimpleCommand(obj =>
                 {
                     Well well = new Well();
-                    wells.Add(well);
+                    Wells.Add(well);
                 })) : addWell;
             }
         }
@@ -101,7 +92,7 @@ namespace WellCalculations2010.ViewModel
                     window.WindowState = WindowState.Minimized;
 
                     List<Well> YXwells = new List<Well>();
-                    foreach (var well in wells)
+                    foreach (var well in Wells)
                     {
                         Well clone = (Well)well.Clone();
                         double temp = clone.WellHeadPoint.X;
@@ -111,6 +102,68 @@ namespace WellCalculations2010.ViewModel
                     }
                     WellPlanarDrawer.ImportWells(new Section(YXwells));
                 })) : importWells;
+            }
+        }
+
+
+        private SimpleCommand saveSegment;
+        public SimpleCommand SaveSegment
+        {
+            get
+            {
+                return saveSegment == null ?
+                    (saveSegment = new SimpleCommand(obj => {
+                        try
+                        {
+                            Section section = new Section(Wells.ToList());
+
+                            OpenFileDialog fileDialog = new OpenFileDialog();
+                            fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                            fileDialog.CheckFileExists = false;
+                            fileDialog.CheckPathExists = true;
+                            if (fileDialog.ShowDialog() == true)
+                            {
+                                section.SaveSection(fileDialog.FileName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                    })) : saveSegment;
+            }
+        }
+
+        private SimpleCommand loadSegment;
+        public SimpleCommand LoadSegment
+        {
+            get
+            {
+
+                return loadSegment == null ?
+                (loadSegment = new SimpleCommand(obj =>
+                {
+                    try
+                    {
+                        Section section = new Section();
+
+                        OpenFileDialog fileDialog = new OpenFileDialog();
+                        fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                        fileDialog.CheckFileExists = false;
+                        fileDialog.CheckPathExists = true;
+                        if (fileDialog.ShowDialog() == true)
+                        {
+                            section = Section.LoadSection(fileDialog.FileName);
+                            Wells.Clear();
+                            foreach (Well well in section.Wells) Wells.Add(well);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+
+                })) : loadSegment;
             }
         }
     }

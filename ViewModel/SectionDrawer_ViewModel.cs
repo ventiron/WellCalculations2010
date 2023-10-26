@@ -363,7 +363,7 @@ namespace WellCalculations2010.ViewModel
                         if (true)
                         {
                             ((Window)obj).WindowState = WindowState.Minimized;
-                            SectionDrawer.DrawSection(section);
+                            SectionDrawer2d.DrawSection(section);
                             return;
                         }
 

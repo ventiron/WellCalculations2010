@@ -67,8 +67,7 @@ namespace WellCalculations2010.Model
             {
                 using (StreamWriter writer = new StreamWriter(fs, Encoding.GetEncoding(1251)))
                 {
-
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section));
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section), new Type[] { typeof(MathPoint), typeof(Point3d), typeof(PolylineVertex3d) });
                     xmlSerializer.Serialize(writer, this);
                 }
             }

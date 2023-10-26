@@ -113,7 +113,7 @@ namespace TriangulationAutoCAD
 
             return text;
         }
-        public static MText CreateMtext(string content, Point3d location, LayerTableRecord layer,  double textHeight = 0d, double rotation = 0, double lineSpacing = 0d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
+        public static MText CreateMtext(string content, Point3d location, LayerTableRecord layer, double textHeight = 0d, double rotation = 0, double lineSpacing = 0d, AttachmentPoint atPoint = AttachmentPoint.BaseAlign)
         {
             MText text = new MText();
             text.SetDatabaseDefaults();
@@ -227,6 +227,7 @@ namespace TriangulationAutoCAD
             return circle;
         }
         #endregion
+
         // Отрисовывает любые доступные для этого объекты
         public static void Initialize(Transaction tr, BlockTableRecord btr, Entity en, bool add = true)
         {

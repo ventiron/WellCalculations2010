@@ -81,7 +81,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoCAD\SectionDrawer.cs" />
+    <Compile Include="AutoCAD\SectionDrawer2d.cs" />
+    <Compile Include="AutoCAD\SectionDrawer3d.cs" />
     <Compile Include="AutoCAD\WellPlanarDrawer.cs" />
     <Compile Include="Converter\LayerAndWellConverter.cs" />
     <Compile Include="Converter\IsOddConverter.cs" />
