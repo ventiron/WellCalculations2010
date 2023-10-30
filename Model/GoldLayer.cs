@@ -11,6 +11,7 @@ namespace WellCalculations2010.Model
     {
         public GoldLayer()
         {
+            isAccounted = false;
             layerName = string.Empty;
             goldContent = String.Empty;
             depth = 0.0d;
@@ -19,12 +20,14 @@ namespace WellCalculations2010.Model
 
         public GoldLayer(string goldContent, double depth, double thickness)
         {
+            isAccounted = false;
             layerName = string.Empty;
             this.goldContent = goldContent;
             this.depth = depth;
             this.thickness = thickness;
         }
 
+        public bool isAccounted { get; set; }
         public string layerName { get; set; }
         public double depth { get; set; }
         public string goldContent { get; set; }

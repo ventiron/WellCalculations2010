@@ -12,16 +12,22 @@ using System.Text;
 using System.Windows;
 using TriangulationAutoCAD;
 using WellCalculations2010.Model;
+using WellCalculations2010.Properties;
 using MathModule.Primitives;
 
 using Section = WellCalculations2010.Model.Section;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
+using Point = WellCalculations2010.Model.Point;
 using WellCalculations2010.Properties;
+using System.Diagnostics;
 
 namespace WellCalculations2010.AutoCAD
 {
     internal class SectionDrawer3d
     {
+
+
+
 
         public static void DrawSectionModel(List<Section> sections)
         {
@@ -29,6 +35,9 @@ namespace WellCalculations2010.AutoCAD
             {
                 DrawSection(section);
             }
+
+            DrawMeshFromSectionPoints(GetSurfacePointsByLines(sections));
+            DrawMeshFromSectionPoints(GetGoldBlockTopPointsByLines(sections));
         }
 
         public static void DrawSection(Section section)
@@ -49,6 +58,7 @@ namespace WellCalculations2010.AutoCAD
                 {
                     WellPlanarDrawer.ImportWells(section);
                     DrawWells(section);
+                    DrawGoldContents(section);
                     DrawEarthTypes(section);
                 }
             }
@@ -57,6 +67,8 @@ namespace WellCalculations2010.AutoCAD
                 MessageBox.Show(ex.Message);
             }
         }
+
+
 
         private static void DrawWells(Section section)
         {
@@ -97,7 +109,126 @@ namespace WellCalculations2010.AutoCAD
                 tr.Commit();
             }
         }
+        private static void DrawGoldContents(Section section)
+        {
+            double goldContentTextHeight = 0.15;
+            double goldContentDepthTextHeight = 0.1;
+            double perpRotationAngle = Math.PI / 2;
+            
 
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+
+            CoordinateSystem3d coordinateSystem = doc.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d;
+
+            
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+                double currentDist = 0;
+                for (int i = 0; i < section.Wells.Count; i++)
+                {
+                    Well well = section.Wells[i];
+
+                    
+
+                    double bottomHeight;
+                    double topHeight = 10000000000000;
+                    double rotation = 0;
+
+                    if (i != section.Wells.Count - 1) 
+                        rotation = WellPlanarDrawer.CalculateRotationSwapXY(well.WellHeadPoint, section.Wells[i + 1].WellHeadPoint) - perpRotationAngle;
+
+                    for (int j = 0; j < well.GoldDatas.Count; j++)
+                    {
+
+                        Matrix3d XrotationMatrix;
+                        Matrix3d ZrotationMatrix;
+
+
+                        bottomHeight = well.WellHeadPoint.Z - well.GoldDatas[j].goldHeight;
+
+                        double markSecondX = well.WellHeadPoint.X - Math.Cos(rotation) * 0.25;
+                        double marksSecondY = well.WellHeadPoint.Y - Math.Sin(rotation) * 0.25;
+
+                        double contentTextX = well.WellHeadPoint.X - Math.Cos(rotation) * 0.35;
+                        double contentTextY = well.WellHeadPoint.Y - Math.Sin(rotation) * 0.35;
+
+                        double heightTextX = well.WellHeadPoint.X + Math.Cos(rotation) * 0.3;
+                        double heightTextY = well.WellHeadPoint.Y + Math.Sin(rotation) * 0.3;
+
+                        
+
+                        //Отрисовываем нижнюю риску содержания
+                        AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
+                            new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, bottomHeight),
+                            new Point3d(markSecondX, marksSecondY, bottomHeight)));
+
+
+                        //Отрисовываем надпись высоты нижней риски содержания
+                        MText bottomText = AutoInitial.CreateMtext(
+                            AutoCADTextFormatter.ApplyAutoCADFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.', ',')}"),
+                            new Point3d(heightTextX, heightTextY, bottomHeight),
+                            textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight);
+
+                        XrotationMatrix = Matrix3d.Rotation(Math.PI * 1.5, coordinateSystem.Xaxis, bottomText.Location);
+                        bottomText.TransformBy(XrotationMatrix);
+                        ZrotationMatrix = Matrix3d.Rotation(rotation, coordinateSystem.Zaxis, bottomText.Location);
+                        bottomText.TransformBy(ZrotationMatrix);
+
+                        bottomText.Rotation = 0d;
+
+                        AutoInitial.Initialize(tr, btr, bottomText);
+
+                        //Отрисовываем верхнюю риску содержания при нужде
+                        if (topHeight - bottomHeight > 0.5)
+                        {
+                            topHeight = bottomHeight + 0.5;
+                            //Отрисовываем верхнюю риску содержания
+                            AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
+                                new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, topHeight),
+                                new Point3d(markSecondX, marksSecondY, topHeight)));
+
+
+                            //Отрисовываем надпись высоты верхней риски содержания
+                            MText topText = AutoInitial.CreateMtext(
+                                AutoCADTextFormatter.ApplyAutoCADFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
+                                new Point3d(heightTextX, heightTextY, topHeight),
+                                textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight);
+
+                            XrotationMatrix = Matrix3d.Rotation(Math.PI * 1.5, coordinateSystem.Xaxis, topText.Location);
+                            topText.TransformBy(XrotationMatrix);
+                            ZrotationMatrix = Matrix3d.Rotation(rotation, coordinateSystem.Zaxis, topText.Location);
+                            topText.TransformBy(ZrotationMatrix);
+
+                            topText.Rotation = 0d;
+
+                            AutoInitial.Initialize(tr, btr, topText);
+                        }
+
+                        //Отрисовываем само содержание
+                        MText contentText = AutoInitial.CreateMtext(AutoCADTextFormatter.ApplyAutoCADFont($"{well.GoldDatas[j].goldContent}"),
+                            new Point3d(contentTextX, contentTextY, bottomHeight + (topHeight - bottomHeight) / 2),
+                            textHeight: goldContentTextHeight, atPoint: AttachmentPoint.MiddleLeft);
+
+                        XrotationMatrix = Matrix3d.Rotation(Math.PI * 1.5, coordinateSystem.Xaxis, contentText.Location);
+                        contentText.TransformBy(XrotationMatrix);
+                        ZrotationMatrix = Matrix3d.Rotation(rotation, coordinateSystem.Zaxis, contentText.Location);
+                        contentText.TransformBy(ZrotationMatrix);
+
+                        contentText.Rotation = 0d;
+
+                        AutoInitial.Initialize(tr, btr, contentText);
+
+                        topHeight = bottomHeight;
+                    }
+                }
+                tr.Commit();
+            }
+        }
 
         private static void DrawEarthTypes(Section section)
         {
@@ -134,14 +265,12 @@ namespace WellCalculations2010.AutoCAD
                             if (i == 0)
                             {
                                 Well nextWell = section.Wells.Count > 1 ? section.Wells[i + 1] : new Well();
-                                MathVector3d vector = new MathVector3d(well.WellHeadPoint, nextWell.WellHeadPoint);
-                                earthSurface.Add(new Point3d(well.WellHeadPoint.X - vector.X / 2, well.WellHeadPoint.Y - vector.Y / 2, well.WellHeadPoint.Z - earthData.earthHeight));
+                                earthSurface.Add(ExtrapolatePointWithInputZ(nextWell.WellHeadPoint, well.WellHeadPoint, well.WellHeadPoint.Z - earthData.earthHeight));
                             }
                             else
                             {
                                 Well prevWell = section.Wells[i - 1];
-                                MathVector3d vector = new MathVector3d(prevWell.WellHeadPoint, well.WellHeadPoint);
-                                earthSurface.Add(new Point3d(well.WellHeadPoint.X - vector.X / 2, well.WellHeadPoint.Y - vector.Y / 2, well.WellHeadPoint.Z - earthData.earthHeight));
+                                earthSurface.Add(GetMiddlePointWithInputZ(well.WellHeadPoint, prevWell.WellHeadPoint, well.WellHeadPoint.Z - earthData.earthHeight));
                             }
                             //Отрисовываем первую точку в первой скважине
                             InterpolateAndAddPoint(earthSurface, new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, well.WellHeadPoint.Z - earthData.earthHeight));
@@ -163,9 +292,7 @@ namespace WellCalculations2010.AutoCAD
                                     {
                                         Well prevWell = section.Wells[k - 1];
                                         Well curWell = section.Wells[k];
-                                        MathVector3d vector = new MathVector3d(curWell.WellHeadPoint, prevWell.WellHeadPoint);
-                                        earthSurface.Add(
-                                            new Point3d(curWell.WellHeadPoint.X + vector.X / 2, curWell.WellHeadPoint.Y + vector.Y / 2, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
+                                        earthSurface.Add(GetMiddlePointWithInputZ(curWell.WellHeadPoint, prevWell.WellHeadPoint, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
                                     }
                                     //Добавляем найденную точку в коллекцию точек поверхности
                                     InterpolateAndAddPoint(earthSurface, 
@@ -175,9 +302,7 @@ namespace WellCalculations2010.AutoCAD
                                     {
                                         Well prevWell = section.Wells[k - 1];
                                         Well curWell = section.Wells[k];
-                                        MathVector3d vector = new MathVector3d(prevWell.WellHeadPoint, curWell.WellHeadPoint);
-                                        InterpolateAndAddPoint(earthSurface, 
-                                            new Point3d(curWell.WellHeadPoint.X + vector.X / 2, curWell.WellHeadPoint.Y + vector.Y / 2, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
+                                        earthSurface.Add(ExtrapolatePointWithInputZ(prevWell.WellHeadPoint, curWell.WellHeadPoint, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
                                         break;
                                     }
                                 }
@@ -187,10 +312,7 @@ namespace WellCalculations2010.AutoCAD
 
                                     Well prevWell = section.Wells[k - 1];
                                     Well curWell = section.Wells[k];
-                                    MathVector3d vector = new MathVector3d(prevWell.WellHeadPoint, curWell.WellHeadPoint);
-
-                                    InterpolateAndAddPoint(earthSurface, 
-                                        new Point3d(prevWell.WellHeadPoint.X + vector.X / 2, prevWell.WellHeadPoint.Y + vector.Y / 2, earthSurface[earthSurface.Count - 1].Z));
+                                    earthSurface.Add(GetMiddlePointWithInputZ(prevWell.WellHeadPoint, curWell.WellHeadPoint, earthSurface[earthSurface.Count - 1].Z));
                                 }
 
                                 if (isInterrupted && earthSurface.Count != 0)
@@ -231,7 +353,6 @@ namespace WellCalculations2010.AutoCAD
                 tr.Commit();
             }
         }
-
         private static List<Point3d> InterpolateBetweenPoints(Point3d firstPoint, Point3d secondPoint, int numberOfPoints)
         {
             List<Point3d> result = new List<Point3d>();
@@ -259,5 +380,134 @@ namespace WellCalculations2010.AutoCAD
             points.Add(point);
         }
 
+
+
+
+        private static void DrawMeshFromSectionPoints(List<Point3dCollection> lines)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+
+
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+
+
+                using (PolyFaceMesh faceMesh = new PolyFaceMesh())
+                {
+                    int vertexCount = 0;
+                    // Add the new object to the block table record and the transaction
+                    AutoInitial.Initialize(tr, btr, faceMesh);
+
+                    foreach (Point3dCollection line in lines)
+                        foreach (Point3d point in line)
+                        {
+                            PolyFaceMeshVertex acPMeshVer = new PolyFaceMeshVertex(point);
+                            faceMesh.AppendVertex(acPMeshVer);
+                            tr.AddNewlyCreatedDBObject(acPMeshVer, true);
+                        }
+
+                    for (int i = 0; i < lines.Count - 1; i++)
+                    {
+                        Point3dCollection currentLine = lines[i];
+                        Point3dCollection nextLine = lines[i + 1];
+
+                        int currentLineFirstVertex = i == 0 ? 1 : vertexCount - currentLine.Count + 1;
+                        int nextLineFirstVertex = currentLineFirstVertex + currentLine.Count;
+
+                        vertexCount = nextLineFirstVertex + nextLine.Count - 1;
+
+
+                        for (int j = 0; j < Math.Max(currentLine.Count, nextLine.Count) - 1; j++)
+                        {
+                            if (j >= Math.Min(currentLine.Count, nextLine.Count) - 1)
+                            {
+                                if (currentLine.Count > nextLine.Count)
+                                    using (FaceRecord face = new FaceRecord((short)(currentLineFirstVertex + j), (short)(currentLineFirstVertex + j + 1),
+                                    (short)(nextLineFirstVertex + nextLine.Count - 1), 0))
+                                    {
+                                        faceMesh.AppendFaceRecord(face);
+                                        tr.AddNewlyCreatedDBObject(face, true);
+                                    }
+                                else
+                                    using (FaceRecord face = new FaceRecord((short)(nextLineFirstVertex + j), (short)(nextLineFirstVertex + j + 1),
+                                    (short)(currentLineFirstVertex + currentLine.Count - 1), 0))
+                                    {
+                                        faceMesh.AppendFaceRecord(face);
+                                        tr.AddNewlyCreatedDBObject(face, true);
+                                    }
+                                continue;
+                            }
+                            using (FaceRecord face = new FaceRecord((short)(currentLineFirstVertex + j), (short)(currentLineFirstVertex + j + 1),
+                                (short)(nextLineFirstVertex + j + 1), 0))
+                            {
+                                faceMesh.AppendFaceRecord(face);
+                                tr.AddNewlyCreatedDBObject(face, true);
+                            }
+                            using (FaceRecord face = new FaceRecord((short)(currentLineFirstVertex + j),
+                                (short)(nextLineFirstVertex + j + 1), (short)(nextLineFirstVertex + j), 0))
+                            {
+                                faceMesh.AppendFaceRecord(face);
+                                tr.AddNewlyCreatedDBObject(face, true);
+                            }
+                        }
+                    }
+                }
+                tr.Commit();
+            }
+
+        }
+
+        public static List<Point3dCollection> GetSurfacePointsByLines(List<Section> sections)
+        {
+            List<Point3dCollection> linePoints = new List<Point3dCollection>();
+            foreach (Section section in sections)
+            {
+                Point3dCollection sectionSurfacePoints = new Point3dCollection();
+                foreach (Well well in section.Wells)
+                {
+                    sectionSurfacePoints.Add(well.WellHeadPoint);
+                }
+                if (sectionSurfacePoints.Count > 0) linePoints.Add(sectionSurfacePoints);
+            }
+            return linePoints;
+        }
+        public static List<Point3dCollection> GetGoldBlockTopPointsByLines(List<Section> sections)
+        {
+            List<Point3dCollection> linePoints = new List<Point3dCollection>();
+            foreach (Section section in sections)
+            {
+                Point3dCollection sectionSurfacePoints = new Point3dCollection();
+                foreach (Well well in section.Wells)
+                {
+                    foreach (GoldLayer layer in well.GoldLayers)
+                    {
+                        if (layer.isAccounted)
+                        {
+                            sectionSurfacePoints.Add(new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, well.WellHeadPoint.Z - layer.depth));
+                            break;
+                        }
+                    }
+                }
+                if (sectionSurfacePoints.Count > 0) linePoints.Add(sectionSurfacePoints);
+            }
+            return linePoints;
+        }
+
+
+        private static Point3d GetMiddlePointWithInputZ(Point p1, Point p2, double z)
+        {
+            MathVector3d vector = new MathVector3d(p1, p2);
+            return new Point3d(p1.X + vector.X / 2, p1.Y + vector.Y / 2, z);
+        }
+        private static Point3d ExtrapolatePointWithInputZ(Point p1, Point p2, double z, double extrapolationMod = 1.5d)
+        {
+            MathVector3d vector = new MathVector3d(p1, p2);
+            return new Point3d(p1.X + vector.X * extrapolationMod, p1.Y + vector.Y * extrapolationMod, z);
+        }
     }
 }

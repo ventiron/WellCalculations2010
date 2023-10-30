@@ -30,7 +30,30 @@ namespace WellCalculations2010.ViewModel
         public static ObservableCollection<String> Hatchpat { get; set; } = new ObservableCollection<string>();
 
 
+        public SectionDrawer_ViewModel()
+        {
+            Scales = new ObservableCollection<string>
+            {
+                "1:10",
+                "1:20",
+                "1:50",
+                "1:100",
+                "1:150",
+                "1:200",
+                "1:250",
+                "1:500",
+                "1:1000",
+                "1:2000"
+            };
 
+            Wells = new ObservableCollection<Well>()
+            {
+                new Well()
+            };
+
+            //Wells = CreateRandomData(1000);
+            SelectedItem = Wells[0];
+        }
 
         private static string selectedVertScale = "1:100";
         public string SelectedVertScale
@@ -98,30 +121,7 @@ namespace WellCalculations2010.ViewModel
                 OnPropertyChanged("GoldContentIsBottom");
             }
         }
-        public SectionDrawer_ViewModel()
-        {
-            Scales = new ObservableCollection<string>
-            {
-                "1:10",
-                "1:20",
-                "1:50",
-                "1:100",
-                "1:150",
-                "1:200",
-                "1:250",
-                "1:500",
-                "1:1000",
-                "1:2000"
-            };
-
-            Wells = new ObservableCollection<Well>()
-            {
-                new Well()
-            };
-
-            //Wells = CreateRandomData(1000);
-            SelectedItem = Wells[0];
-        }
+  
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string prop = "")

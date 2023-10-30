@@ -148,12 +148,14 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
+                                                <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
 
-                                            <TextBlock Grid.Column="0" Text="№ (название) слоя" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="глубина слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                                            <TextBlock Grid.Column="2" Text="Ср. сод. слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                                            <TextBlock Grid.Column="3" Text="мощность слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="0" Text="Входит в блок" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="№ (название) слоя" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="Глубина слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="3" Text="Ср. сод. слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                            <TextBlock Grid.Column="4" Text="Мощность слоя" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
                                         </Grid>
 
 
@@ -170,6 +172,7 @@
                                                             <ColumnDefinition/>
                                                             <ColumnDefinition/>
                                                             <ColumnDefinition/>
+                                                            <ColumnDefinition/>
                                                         </Grid.ColumnDefinitions>
 
                                                         <Button Grid.Column="0" Grid.Row="1" Content="-" FontSize="20" VerticalContentAlignment="Center" Padding="0" 
@@ -182,11 +185,12 @@
                                                                 </MultiBinding>
                                                             </Button.CommandParameter>
                                                         </Button>
-
-                                                        <TextBox Grid.Column="1" Text="{Binding layerName}"/>
-                                                        <TextBox Grid.Column="2" Text="{Binding depth}"/>
-                                                        <TextBox Grid.Column="3" Text="{Binding goldContent}"/>
-                                                        <TextBox Grid.Column="4" Text="{Binding thickness}"/>
+                                                        
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding isAccounted}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Column="2" Text="{Binding layerName}"/>
+                                                        <TextBox Grid.Column="3" Text="{Binding depth}"/>
+                                                        <TextBox Grid.Column="4" Text="{Binding goldContent}"/>
+                                                        <TextBox Grid.Column="5" Text="{Binding thickness}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
@@ -207,10 +211,10 @@
         </TabItem>
         <TabItem Header="Настройки">
             <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -228,16 +232,16 @@
                         <TextBox Text="{Binding WellPlanarTextSize, Source={x:Static properties:Settings.Default}}"/>
                     </StackPanel>
                 </GroupBox>
-            <GroupBox Grid.Row="0" Grid.Column="1" Header="Шкалы высот">
-                    
-                </GroupBox>
-            <GroupBox Grid.Row="1" Grid.Column="0" Header="">
-                <StackPanel>
-                    
-                </StackPanel>
-            </GroupBox>
+                <GroupBox Grid.Row="0" Grid.Column="1" Header="Режимы отрисовки слоев">
 
-            <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Left" Margin="309,5,0,0" Grid.Row="2" VerticalAlignment="Top" Command="{Binding SaveSettings}"/>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Grid.Column="0" Header="Вид метки">
+                    <StackPanel>
+
+                    </StackPanel>
+                </GroupBox>
+
+                <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Left" Margin="309,5,0,0" Grid.Row="2" VerticalAlignment="Top" Command="{Binding SaveSettings}"/>
 
             </Grid>
         </TabItem>

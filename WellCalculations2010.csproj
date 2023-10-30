@@ -81,6 +81,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoCAD\AutoCADTextFormatter.cs" />
     <Compile Include="AutoCAD\SectionDrawer2d.cs" />
     <Compile Include="AutoCAD\SectionDrawer3d.cs" />
     <Compile Include="AutoCAD\WellPlanarDrawer.cs" />

@@ -21,7 +21,11 @@ namespace WellCalculations2010.ViewModel
 
         public WellPlanarImport_ViewModel()
         {
-            Wells = new ObservableCollection<Well>();
+            Wells = new ObservableCollection<Well>()
+            {
+                new Well()
+            };
+            Wells[0].GoldLayers.Add(new GoldLayer());
         }
 
         #region PropertyChanged

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.OleDb;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
@@ -30,7 +31,7 @@ namespace WellCalculations2010.AutoCAD
         private static SectionDrawer_Window _SectionDrawer_Window;
         private static WellPlanarImport_Window _WellPlanarImport_Window;
 
-
+        
 
         [CommandMethod("РРР")]
         public void DrawSection_Command()
@@ -84,7 +85,7 @@ namespace WellCalculations2010.AutoCAD
             }
             catch (System.Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show($"{ex.Message}\n{ex}");
             }
         }
 
