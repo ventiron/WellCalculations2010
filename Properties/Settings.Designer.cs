@@ -202,5 +202,101 @@ namespace WellCalculations2010.Properties {
                 this["WellPlanarTextSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddHardEarth {
+            get {
+                return ((bool)(this["AddHardEarth"]));
+            }
+            set {
+                this["AddHardEarth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double AddHardEarthDist {
+            get {
+                return ((double)(this["AddHardEarthDist"]));
+            }
+            set {
+                this["AddHardEarthDist"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawWells {
+            get {
+                return ((bool)(this["DrawWells"]));
+            }
+            set {
+                this["DrawWells"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawContents {
+            get {
+                return ((bool)(this["DrawContents"]));
+            }
+            set {
+                this["DrawContents"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawEarthSurfaces {
+            get {
+                return ((bool)(this["DrawEarthSurfaces"]));
+            }
+            set {
+                this["DrawEarthSurfaces"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawHardEarthSurfaces {
+            get {
+                return ((bool)(this["DrawHardEarthSurfaces"]));
+            }
+            set {
+                this["DrawHardEarthSurfaces"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawTable {
+            get {
+                return ((bool)(this["DrawTable"]));
+            }
+            set {
+                this["DrawTable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DrawScaleRuller {
+            get {
+                return ((bool)(this["DrawScaleRuller"]));
+            }
+            set {
+                this["DrawScaleRuller"] = value;
+            }
+        }
     }
 }

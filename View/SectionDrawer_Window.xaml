@@ -29,7 +29,10 @@
             <Setter Property="Control.FontSize" Value="14"/>
             <Setter Property="Control.HorizontalAlignment" Value="Stretch"/>
         </Style>
-
+        <Style x:Key="Transparent">
+            <Setter Property="Control.Background" Value="Transparent"/>
+            <Setter Property="Control.BorderBrush" Value="Transparent"/>
+        </Style>
         <!--Background всех ListboxItem будет чередоваться-->
         <Style  TargetType="{x:Type ListBoxItem}">
             <Setter Property="Padding" Value="0"/>
@@ -227,7 +230,6 @@
                                 <RowDefinition Height="30"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
 
                             <!--Подписи к таблице по породам-->
@@ -243,7 +245,7 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                     ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="1" SelectedItem="{Binding SelectedGoldData}">
+                     ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="1" SelectedItem="{Binding SelectedGoldData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -252,7 +254,8 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-
+                                            <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteGoldData, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                    CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
                                             <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"/>
                                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"/>
                                         </Grid>
@@ -261,8 +264,6 @@
                             </ListBox>
                             <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="20" Command="{Binding AddGoldData}"/>
-                            <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Content="-" FontSize="20" Command="{Binding DeleteGoldData}"/>
                         </Grid>
 
                         <!--Данные по породам-->
@@ -270,7 +271,6 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="30"/>
                                 <RowDefinition/>
-                                <RowDefinition Height="30"/>
                                 <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
                             <!--Подписи к таблице по породам-->
@@ -285,7 +285,7 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                     ItemsSource="{Binding SelectedItem.EarthDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}">
+                                    ItemsSource="{Binding SelectedItem.EarthDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -294,7 +294,8 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-
+                                            <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteEarthData, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                    CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
                                             <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding earthType}" TextAlignment="Center"/>
                                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding earthHeight}" TextAlignment="Center"/>
                                         </Grid>
@@ -304,9 +305,6 @@
 
                             <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Content="+" FontSize="20" Command="{Binding AddEarthData}"/>
-                            <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Content="-" FontSize="20" Command="{Binding DeleteEarthData}"/>
-
                         </Grid>
 
                         <!--Данные по породам-->
@@ -315,13 +313,12 @@
                                 <RowDefinition Height="30"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
                             <!--Подписи к таблице по породам-->
                             <Grid Grid.Row="0" Grid.Column="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="40"/>
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
@@ -335,18 +332,20 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                                     ItemsSource="{Binding SelectedItem.GoldLayers}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}">
+                                     ItemsSource="{Binding SelectedItem.GoldLayers}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="20"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="40"/>
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteGoldLayer, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                    CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
                                             <CheckBox Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding isAccounted}"/>
                                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding layerName}" TextAlignment="Center"/>
                                             <TextBox Grid.Column="3" HorizontalAlignment="Stretch" Text="{Binding depth}" TextAlignment="Center"/>
@@ -358,9 +357,7 @@
                             </ListBox>
 
                             <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    Content="+" FontSize="20" Command="{Binding AddEarthData}"/>
-                            <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    Content="-" FontSize="20" Command="{Binding DeleteEarthData}"/>
+                                    Content="+" FontSize="20" Command="{Binding AddGoldLayer}"/>
                         </Grid>
                         
                     </Grid>
@@ -404,6 +401,15 @@
                             <TextBox Text="{Binding InterpolatedPointsNumber, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
                             <TextBlock Text="Расстояние штриховки разрушенных пород" Style="{StaticResource  SettingsTextBlock}"/>
                             <TextBox Text="{Binding SolidEarthHatchDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                            <CheckBox Content="Добавить отсутствующие точки коренных пород" x:Name="AddHardEarth_CheckBox"
+                                      IsChecked="{Binding AddHardEarth, Source={x:Static properties:Settings.Default}}"  
+                                      Style="{StaticResource  SettingsTextBox}" VerticalContentAlignment="Center"/>
+                            <GroupBox IsEnabled="{Binding IsChecked, ElementName=AddHardEarth_CheckBox}">
+                                <StackPanel>
+                                    <TextBlock Text="Расстояние от почвы скважины до новой точки" Style="{StaticResource  SettingsTextBlock}"/>
+                                    <TextBox Text="{Binding AddHardEarthDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                                </StackPanel>
+                            </GroupBox>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="0" Grid.Column="1" Header="Шкалы высот">
@@ -437,6 +443,22 @@
                                     IsChecked="{Binding IsFullVertScaleRullerReq, Source={x:Static properties:Settings.Default}}"/>
                                 </StackPanel>
                             </GroupBox>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Grid.Row="1" Grid.Column="1" Header="Настройки отрисовки">
+                        <StackPanel>
+                            <CheckBox Content="Отрисовывать скважины" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовывать породы" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовывать коренные породы" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawHardEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовывать содержания" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawContents, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовывать линейку высот" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawScaleRuller, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовывать таблицу" Style="{StaticResource  SettingsTextBlock}" 
+                                IsChecked="{Binding DrawTable, Source={x:Static properties:Settings.Default}}"/>
                         </StackPanel>
                     </GroupBox>
 

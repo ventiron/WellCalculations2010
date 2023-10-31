@@ -15,11 +15,16 @@ using WellCalculations2010.Model;
 
 using Section = WellCalculations2010.Model.Section;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
+using Point = WellCalculations2010.Model.Point;
+using DocumentFormat.OpenXml.Bibliography;
+using WellCalculations2010.Properties;
 
 namespace WellCalculations2010.AutoCAD
 {
     internal class SectionDrawer2d
     {
+        private static Point3d basePoint = new Point3d();
+
         private static double vertScale;
         private static double horScale;
         private static double vertScaleStep;
@@ -73,7 +78,7 @@ namespace WellCalculations2010.AutoCAD
             {
                 return;
             }
-            Point3d basePoint = ppr.Value;
+            basePoint = ppr.Value;
             try
             {
                 //Блочим документ потому что так надо
@@ -82,12 +87,18 @@ namespace WellCalculations2010.AutoCAD
                     AutoCADTextFormatter.FormatSectionStrings(section);
                     if (!Properties.Settings.Default.IsSplitByDistance)
                     {
-                        DrawScaleRuler(basePoint);
-                        DrawTable(basePoint, section);
-                        DrawWells(basePoint, section);
-                        DrawGoldContents(basePoint, section);
-                        DrawEarthTypes(basePoint, section);
-                        DrawHardEarthTypes(basePoint, section);
+                        if(Settings.Default.DrawScaleRuller)
+                            DrawScaleRuler();
+                        if (Settings.Default.DrawTable)
+                            DrawTable(section);
+                        if (Settings.Default.DrawWells)
+                            DrawWells(section);
+                        if (Settings.Default.DrawContents)
+                            DrawGoldContents(section);
+                        if (Settings.Default.DrawEarthSurfaces)
+                            DrawEarthTypes(section);
+                        if (Settings.Default.DrawHardEarthSurfaces)
+                            DrawHardEarthTypes(section);
                     }
                     else
                     {
@@ -104,19 +115,19 @@ namespace WellCalculations2010.AutoCAD
                             length += section.Wells[i].DistanceToNextWell / horScale;
                             if ((length + distModifier > Properties.Settings.Default.SplitDistance) || i == section.Wells.Count - 1)
                             {
-                                Point3d splitPoint = new Point3d(basePoint.X + currentDist, basePoint.Y, basePoint.Z);
+                                basePoint = new Point3d(basePoint.X + currentDist, basePoint.Y, basePoint.Z);
 
                                 currentDist += length + tableLength + distBetveenSections;
 
                                 if (!Properties.Settings.Default.IsFullVertScaleRullerReq)
                                     CalculateMinMaxHeight(splitSection);
 
-                                DrawScaleRuler(splitPoint);
-                                DrawTable(splitPoint, splitSection);
-                                DrawWells(splitPoint, splitSection);
-                                DrawGoldContents(splitPoint, splitSection);
-                                DrawEarthTypes(splitPoint, splitSection);
-                                DrawHardEarthTypes(splitPoint, splitSection);
+                                DrawScaleRuler();
+                                DrawTable(splitSection);
+                                DrawWells(splitSection);
+                                DrawGoldContents(splitSection);
+                                DrawEarthTypes(splitSection);
+                                DrawHardEarthTypes(splitSection);
 
                                 Well lastWell = splitSection.Wells[splitSection.Wells.Count - 1];
                                 splitSection = new Section();
@@ -143,7 +154,7 @@ namespace WellCalculations2010.AutoCAD
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка<</param>
-        private static void DrawWells(Point3d basePoint, Section section)
+        private static void DrawWells(Section section)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -159,13 +170,13 @@ namespace WellCalculations2010.AutoCAD
 
                 //Основной цикл отрисовки
                 double currentDist = 0;
-                
+
                 for (int i = 0; i < section.Wells.Count; i++)
                 {
                     Well well = section.Wells[i];
 
                     // Первая точка сплайна поверхности
-                    
+
 
                     //Отрисовываем скважину
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
@@ -185,7 +196,7 @@ namespace WellCalculations2010.AutoCAD
                         textHeight: textHeight, atPoint: AttachmentPoint.TopCenter));
 
 
-                    
+
                     //Увеличиваем расстояние до скважины
                     if (i != section.Wells.Count - 1)
                         currentDist += well.DistanceToNextWell / horScale;
@@ -203,7 +214,7 @@ namespace WellCalculations2010.AutoCAD
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
-        private static void DrawGoldContents(Point3d basePoint, Section section)
+        private static void DrawGoldContents(Section section)
         {
             double goldContentTextHeight = 0.15 / vertScale;
             double goldContentDepthTextHeight = 0.1 / vertScale;
@@ -272,7 +283,7 @@ namespace WellCalculations2010.AutoCAD
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
-        private static void DrawEarthTypes(Point3d basePoint, Section section)
+        private static void DrawEarthTypes(Section section)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
@@ -303,17 +314,8 @@ namespace WellCalculations2010.AutoCAD
                             earthDatas.Add(earthData.earthType);
                             double distForEarth = currentDist;
                             Point3dCollection earthSurface = new Point3dCollection();
-                            //Отрисовываем экстраполяцию в начало если скважина - первая в буровой линии
-                            if (i == 0)
-                                earthSurface.Add(new Point3d(
-                                    basePoint.X + distFromScale / 2 + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
-                            else
-                                earthSurface.Add(new Point3d(
-                                    basePoint.X + distFromScale + distForEarth - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
-                            //Отрисовываем первую точку в первой скважине
-                            InterpolateAndAddPoint(earthSurface, new Point3d(
-                                    basePoint.X + distFromScale + distForEarth, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), 0));
+
+                            AddPointWithExtrapolation2d(earthSurface, distForEarth, basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - earthData.earthHeight), section, i);
 
                             bool isInterrupted = false;
                             distForEarth += well.DistanceToNextWell / horScale;
@@ -328,23 +330,10 @@ namespace WellCalculations2010.AutoCAD
                                 {
                                     EarthData nextEarthData = section.Wells[k].EarthDatas[index];
 
-                                    //При прерывании если находим в последующих скважинах нужную породу сначала добавляем точку посередине 2 скважин
-                                    if (earthSurface.Count == 0)
-                                        earthSurface.Add(new Point3d(
-                                            basePoint.X + distFromScale + distForEarth - section.Wells[k - 1].DistanceToNextWell / horScale / 2,
-                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
-                                    //Добавляем найденную точку в коллекцию точек поверхности
-                                    InterpolateAndAddPoint(earthSurface, new Point3d(
-                                        basePoint.X + distFromScale + distForEarth,
-                                        basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
+                                    AddPointWithExtrapolation2d(earthSurface, distForEarth, basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), section, k);
 
                                     if (k == section.Wells.Count - 1)
-                                    {
-                                        InterpolateAndAddPoint(earthSurface, new Point3d(
-                                            basePoint.X + distFromScale * 1.5 + distForEarth,
-                                            basePoint.Y + GetHeightDifference(section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight), 0));
                                         break;
-                                    }
                                 }
                                 else if (earthSurface.Count != 0)
                                 {
@@ -397,7 +386,7 @@ namespace WellCalculations2010.AutoCAD
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
-        private static void DrawHardEarthTypes(Point3d basePoint, Section section)
+        private static void DrawHardEarthTypes(Section section)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
@@ -421,89 +410,61 @@ namespace WellCalculations2010.AutoCAD
                     string destEarthTemp = well.DestHardEarthThickness.Replace(',', '.');
                     string solidEarthTemp = well.SolidHardEarthThickness.Replace(',', '.');
 
-                    double solidEarth = 0.0;
-                    double destEarth = 0.0;
+                    double solidEarth;
+                    double.TryParse(solidEarthTemp, out solidEarth);
+                    double destEarth;
+                    double.TryParse(destEarthTemp, out destEarth);
 
-                    if (double.TryParse(solidEarthTemp, out solidEarth))
+                    //Работа с плотными коренными породами
+                    if (solidEarth != 0d)
                     {
-                        isThereNoSolidHardEarth = false;
-                        //Проверка первой точки, вносим в массив первую точку экстраполяции
-                        if (solidEarthPoints.Count == 0)
+                        AddPointWithExtrapolation2d(solidEarthPoints, currentDist,
+                            basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth),
+                            section, i);
+                    }
+                    else if (solidEarthPoints.Count != 0 || Settings.Default.AddHardEarth)
+                    {
+                        if (Settings.Default.AddHardEarth)
                         {
-                            if (i == 0)
-                            {
-                                solidEarthPoints.Add(new Point3d(
-                                        basePoint.X + distFromScale / 2 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
-                            }
-                            else
-                                solidEarthPoints.Add(new Point3d(
-                                    basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
+                            AddPointWithExtrapolation2d(solidEarthPoints, currentDist,
+                                basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth - Settings.Default.AddHardEarthDist - (destEarth == 0d ? 1d : 0d)),
+                                section, i);
                         }
-
-                        //Вносим в массив саму точку
-                        InterpolateAndAddPoint(solidEarthPoints, new Point3d(
-                                        basePoint.X + distFromScale + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
-
-                        //Проверка последней точки, вносим в массим экстраполяцию последней точки
-                        if (i == section.Wells.Count - 1)
+                        else
                         {
                             InterpolateAndAddPoint(solidEarthPoints, new Point3d(
-                                        basePoint.X + distFromScale * 1.5 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth), 0));
-                        }
-                    }
-                    else if (solidEarthPoints.Count != 0)
-                    {
-                        InterpolateAndAddPoint(solidEarthPoints, new Point3d(
                                             solidEarthPoints[solidEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
                                             solidEarthPoints[solidEarthPoints.Count - 1].Y, 0));
-                        AutoInitial.Initialize(tr, btr, new Spline(solidEarthPoints, 5, 0.0));
-                        solidEarthPoints = new Point3dCollection();
+                            AutoInitial.Initialize(tr, btr, new Spline(solidEarthPoints, 5, 0.0));
+                            solidEarthPoints = new Point3dCollection();
+                        }
                     }
 
-
-                    if (double.TryParse(destEarthTemp, out destEarth))
+                    //Работа с разрушенными коренными породами
+                    if (destEarth != 0d)
                     {
-                        //Проверка первой точки, вносим в массив первую точку экстраполяции
-                        if (destEarthPoints.Count == 0)
+                        AddPointWithExtrapolation2d(destEarthPoints, currentDist,
+                            basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth),
+                            section, i);
+                    }
+                    else if (destEarthPoints.Count != 0 || Settings.Default.AddHardEarth)
+                    {
+                        if (Settings.Default.AddHardEarth && solidEarth == 0)
                         {
-                            if (i == 0)
-                            {
-                                destEarthPoints.Add(new Point3d(
-                                        basePoint.X + distFromScale / 2 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
-                            }
-                            else
-                                destEarthPoints.Add(new Point3d(
-                                    basePoint.X + distFromScale + currentDist - section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
+                            AddPointWithExtrapolation2d(destEarthPoints, currentDist,
+                                basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth - Settings.Default.AddHardEarthDist),
+                                section, i);
                         }
-
-                        //Вносим в массив саму точку
-                        InterpolateAndAddPoint(destEarthPoints, new Point3d(
-                                        basePoint.X + distFromScale + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
-
-                        //Проверка последней точки, вносим в массим экстраполяцию последней точки
-                        if (i == section.Wells.Count - 1)
+                        else
                         {
                             InterpolateAndAddPoint(destEarthPoints, new Point3d(
-                                        basePoint.X + distFromScale * 1.5 + currentDist,
-                                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth), 0));
+                                                destEarthPoints[destEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
+                                                destEarthPoints[destEarthPoints.Count - 1].Y, 0));
+                            Spline destEarthSurf = new Spline(destEarthPoints, 5, 0.0);
+                            destEarthSurf.LineWeight = LineWeight.LineWeight015;
+                            AutoInitial.Initialize(tr, btr, destEarthSurf);
+                            destEarthPoints = new Point3dCollection();
                         }
-                    }
-                    else if (destEarthPoints.Count != 0)
-                    {
-                        InterpolateAndAddPoint(destEarthPoints, new Point3d(
-                                            destEarthPoints[destEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-                                            destEarthPoints[destEarthPoints.Count - 1].Y, 0));
-                        Spline destEarthSurf = new Spline(destEarthPoints, 5, 0.0);
-                        destEarthSurf.LineWeight = LineWeight.LineWeight015;
-                        AutoInitial.Initialize(tr, btr, destEarthSurf);
-                        destEarthPoints = new Point3dCollection();
                     }
 
 
@@ -543,12 +504,36 @@ namespace WellCalculations2010.AutoCAD
             }
         }
 
+        private static void AddPointWithExtrapolation2d(Point3dCollection points, double dist, double Y, Section section, int counter)
+        {
+            if (points.Count == 0)
+            {
+                if (counter == 0)
+                {
+                    points.Add(new Point3d(basePoint.X + distFromScale / 2 + dist, Y, 0));
+                }
+                else
+                    points.Add(new Point3d(
+                        basePoint.X + distFromScale + dist - section.Wells[counter - 1].DistanceToNextWell / horScale / 2,
+                        Y, 0));
+            }
+
+            //Вносим в массив саму точку
+            InterpolateAndAddPoint(points, new Point3d(basePoint.X + distFromScale + dist, Y, 0));
+
+            //Проверка последней точки, вносим в массим экстраполяцию последней точки
+            if (counter == section.Wells.Count - 1)
+            {
+                InterpolateAndAddPoint(points, new Point3d(basePoint.X + distFromScale * 1.5 + dist, Y, 0));
+            }
+        }
+
         /// <summary>
         /// Отрисовывает таблицу под разрезом, а также заполняет её данными скважин
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
-        private static void DrawTable(Point3d basePoint, Section section)
+        private static void DrawTable(Section section)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
@@ -592,10 +577,7 @@ namespace WellCalculations2010.AutoCAD
                         $"{well.SoftEarthThickness}\n" +
                         $"{well.DestHardEarthThickness}\n" +
                         $"{well.SolidHardEarthThickness}\n" +
-                        $"{well.TurfThickness}\n" +
-                        $"{well.GoldLayerThickness}\n" +
-                        $"{well.GoldLayerContentSlip}\n" +
-                        $"{well.VerticalGoldContent}\n"),
+                        $"{GetGoldLayersString(well)}"),
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2.20, 0),
                         textHeight: textHeight, lineSpacing: TextSpacing, atPoint:  AttachmentPoint.TopCenter));
 
@@ -646,11 +628,37 @@ namespace WellCalculations2010.AutoCAD
             }
         }
 
+        private static string GetGoldLayersString(Well well)
+        {
+            int padding = 9;
+
+            StringBuilder depth = new StringBuilder();
+            StringBuilder thickness = new StringBuilder();
+            StringBuilder content = new StringBuilder();
+            StringBuilder verticalContent = new StringBuilder();
+            foreach (GoldLayer layer in well.GoldLayers)
+            {
+                depth.Append($"{layer.depth}".PadRight(padding));
+                thickness.Append($"{layer.thickness}".PadRight(padding));
+                content.Append($"{(layer.goldContent.Trim().Equals(string.Empty) ? "-" : layer.goldContent)}".PadRight(padding));
+
+                double parsedContent;
+                bool parsed = double.TryParse(layer.goldContent, out parsedContent);
+                verticalContent.Append($"{(parsed ? (layer.thickness * parsedContent).ToString("0,000") : "-")}".PadRight(padding));
+            }
+
+            return 
+                $"{depth}\n" +
+                $"{thickness}\n" +
+                $"{content}\n" +
+                $"{verticalContent}";
+        }
+
         /// <summary>
         /// Рисует шкалу вертикального масштаба относительно базовой точки
         /// </summary>
         /// <param name="basePoint">Точка, используемая как начало отсчета координат</param>
-        private static void DrawScaleRuler(Point3d basePoint)
+        private static void DrawScaleRuler()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;

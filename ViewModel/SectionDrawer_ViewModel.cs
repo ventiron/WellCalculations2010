@@ -43,7 +43,12 @@ namespace WellCalculations2010.ViewModel
                 "1:250",
                 "1:500",
                 "1:1000",
-                "1:2000"
+                "1:2000",
+                "1:5000",
+                "1:10000",
+                "1:20000",
+                "1:25000",
+                "1:50000"
             };
 
             Wells = new ObservableCollection<Well>()
@@ -155,14 +160,22 @@ namespace WellCalculations2010.ViewModel
 
         //Функции добавления скважин, содержаний, пород.
 
-
+        #region [Add commands]
         private SimpleCommand addWell;
         public SimpleCommand AddWell
         {
             get
             {
                 return addWell == null ?
-                    (addWell = new SimpleCommand(obj => { Wells.Add(new Well()); })) : addWell;
+                    (addWell = new SimpleCommand(obj => {
+                        if (Wells.Count == 0)
+                        {
+                            Wells.Add(new Well());
+                            return;
+                        }
+                        Wells.Insert(Wells.IndexOf(selectedItem) + 1, new Well());
+
+                    })) : addWell;
             }
         }
 
@@ -175,6 +188,7 @@ namespace WellCalculations2010.ViewModel
                     (addGoldData = new SimpleCommand(obj => { if (SelectedItem != null) SelectedItem.GoldDatas.Add(new GoldData()); })) : addGoldData;
             }
         }
+
         private SimpleCommand addEarthData;
         public SimpleCommand AddEarthData
         {
@@ -184,7 +198,18 @@ namespace WellCalculations2010.ViewModel
                     (addEarthData = new SimpleCommand(obj => { if(SelectedItem!=null) SelectedItem.EarthDatas.Add(new EarthData()); })) : addEarthData;
             }
         }
+        private SimpleCommand addGoldLayer;
+        public SimpleCommand AddGoldLayer
+        {
+            get
+            {
+                return addGoldLayer == null ?
+                    (addGoldLayer = new SimpleCommand(obj => { if (SelectedItem != null) SelectedItem.GoldLayers.Add(new GoldLayer()); })) : addGoldLayer;
+            }
+        }
+        #endregion
 
+        #region [Delete commands]
         private SimpleCommand deleteWell;
         public SimpleCommand DeleteWell
         {
@@ -198,8 +223,6 @@ namespace WellCalculations2010.ViewModel
             }
         }
 
-
-
         private SimpleCommand deleteGoldData;
         public SimpleCommand DeleteGoldData
         {
@@ -207,12 +230,7 @@ namespace WellCalculations2010.ViewModel
             {
                 return deleteGoldData == null ?
                     (deleteGoldData = new SimpleCommand(obj => {
-                        //SelectedItem.GoldDatas.delete(new GoldData());
-                        if (SelectedGoldData != null && SelectedItem.GoldDatas.Contains(SelectedGoldData))
-                        {
-                            SelectedItem.GoldDatas.Remove(SelectedGoldData);
-
-                        }
+                        SelectedItem.GoldDatas.Remove((GoldData)obj);
                     })) : deleteGoldData;
             }
         }
@@ -224,17 +242,25 @@ namespace WellCalculations2010.ViewModel
             {
                 return deleteEarthData == null ?
                     (deleteEarthData = new SimpleCommand(obj => {
-                        //SelectedItem.EarthDatas.delete(new EarthData()); 
-                        if (SelectedEarthData != null && SelectedItem.EarthDatas.Contains(SelectedEarthData))
-                        {
-                            SelectedItem.EarthDatas.Remove(SelectedEarthData);
-
-                        }
+                        SelectedItem.EarthDatas.Remove((EarthData) obj);
                     })) : deleteEarthData;
             }
         }
+        private SimpleCommand deleteGoldLayer;
+        public SimpleCommand DeleteGoldLayer
+        {
+            get
+            {
+                return deleteGoldLayer == null ?
+                    (deleteGoldLayer = new SimpleCommand(obj => {
+                        if(selectedItem.GoldLayers.Count != 1)
+                            SelectedItem.GoldLayers.Remove((GoldLayer)obj);
+                    })) : deleteGoldLayer;
+            }
+        }
+        #endregion
 
-
+        #region [Well move commands]
         private SimpleCommand swapWellsUp;
         public SimpleCommand SwapWellsUp
         {
@@ -273,7 +299,7 @@ namespace WellCalculations2010.ViewModel
                     })) : swapWellsDown;
             }
         }
-
+        #endregion
 
 
 
