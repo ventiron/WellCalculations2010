@@ -19,7 +19,6 @@ using ClosedXML.Excel;
 
 
 
-
 namespace WellCalculations2010.ViewModel
 {
     internal class SectionDrawer_ViewModel : INotifyPropertyChanged
@@ -301,7 +300,24 @@ namespace WellCalculations2010.ViewModel
         }
         #endregion
 
-
+        private SimpleCommand print;
+        public SimpleCommand Print
+        {
+            get
+            {
+                return saveSegment == null ?
+                    (saveSegment = new SimpleCommand(obj => {
+                        try
+                        {
+                            MessageBox.Show(obj.ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                    })) : saveSegment;
+            }
+        }
 
         private SimpleCommand saveSegment;
         public SimpleCommand SaveSegment

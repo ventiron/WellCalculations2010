@@ -19,7 +19,6 @@ namespace WellCalculations2010.AutoCAD
         {
             foreach (Well well in section.Wells)
             {
-                well.SoftEarthThickness = well.SoftEarthThickness.Trim().Replace(',', '.');
                 well.DestHardEarthThickness = well.DestHardEarthThickness.Trim().Replace(',', '.');
                 well.SolidHardEarthThickness = well.SolidHardEarthThickness.Trim().Replace(',', '.');
                 well.TurfThickness = well.TurfThickness.Trim().Replace(',', '.');
@@ -28,10 +27,7 @@ namespace WellCalculations2010.AutoCAD
                 well.VerticalGoldContent = well.VerticalGoldContent.Trim().Replace(',', '.');
 
 
-                if (double.TryParse(well.SoftEarthThickness, out double softEarthThickness))
-                {
-                    well.SoftEarthThickness = softEarthThickness.ToString("0.0").Replace('.', ',');
-                }
+
                 if (double.TryParse(well.DestHardEarthThickness, out double destHardEarthThickness))
                 {
                     well.DestHardEarthThickness = destHardEarthThickness.ToString("0.0").Replace('.', ',');

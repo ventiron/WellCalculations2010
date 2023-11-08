@@ -25,7 +25,6 @@ namespace WellCalculations2010.Model
             WellName = "0";
             DistanceToNextWell = 0;
             WellDepth = 0;
-            SoftEarthThickness = "";
             DestHardEarthThickness = "";
             SolidHardEarthThickness = "";
             TurfThickness = "";
@@ -44,7 +43,15 @@ namespace WellCalculations2010.Model
         public string WellName { get; set; }
         public double DistanceToNextWell { get; set; }
         public double WellDepth { get; set; }
-        public string SoftEarthThickness { get; set; }
+        public string SoftEarthThickness {
+            get
+            {
+                double.TryParse(DestHardEarthThickness.Replace(',','.'), out double destHardEarth);
+                double.TryParse(SolidHardEarthThickness.Replace(',', '.'), out double solidHardEarth);
+
+                return (WellDepth - destHardEarth - solidHardEarth).ToString("0.0").Replace('.', ',');
+            }
+        }
         public string DestHardEarthThickness { get; set; }
         public string SolidHardEarthThickness { get; set; }
         public string TurfThickness { get; set; }
@@ -59,7 +66,6 @@ namespace WellCalculations2010.Model
             clone.WellName = this.WellName;
             clone.DistanceToNextWell = this.DistanceToNextWell;
             clone.WellDepth = this.WellDepth;
-            clone.SoftEarthThickness = this.SoftEarthThickness;
             clone.DestHardEarthThickness = this.DestHardEarthThickness;
             clone.SolidHardEarthThickness = this.SolidHardEarthThickness;
             clone.TurfThickness = this.TurfThickness;

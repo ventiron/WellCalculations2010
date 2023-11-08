@@ -9,7 +9,7 @@
              xmlns:converter="clr-namespace:WellCalculations2010.Converter"
              mc:Ignorable="d" 
              x:Name="MainWindow"
-             Height="650" Width="1000">
+             Height="650" Width="1200" >
     <Window.DataContext>
         <VM:SectionDrawer_ViewModel/>
     </Window.DataContext>
@@ -33,6 +33,39 @@
             <Setter Property="Control.Background" Value="Transparent"/>
             <Setter Property="Control.BorderBrush" Value="Transparent"/>
         </Style>
+
+        <Style x:Key="3d_Show" TargetType="ColumnDefinition">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="True">
+                    <Setter Property="Width" Value="1*"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="False">
+                    <Setter Property="Width" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="3d_Show_DoubleWidth" TargetType="ColumnDefinition">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="True">
+                    <Setter Property="Width" Value="2*"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="False">
+                    <Setter Property="Width" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="3d_Hide" TargetType="ColumnDefinition">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="True">
+                    <Setter Property="Width" Value="0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=Mode3d_CheckBox}" Value="False">
+                    <Setter Property="Width" Value="1*"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!--Background всех ListboxItem будет чередоваться-->
         <Style  TargetType="{x:Type ListBoxItem}">
             <Setter Property="Padding" Value="0"/>
@@ -53,7 +86,7 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        
+
         <!--Backgroun всех TextBox будет равен Backgroun первого родителя-->
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Control}, AncestorLevel=1}}"/>
@@ -67,12 +100,14 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Expander ExpandDirection="Left" HorizontalAlignment="Right" VerticalAlignment="Center" IsExpanded="False" >
-            <Grid Width="180">
-                
+        <Expander ExpandDirection="Left" HorizontalAlignment="Right" VerticalAlignment="Stretch" IsExpanded="False"  VerticalContentAlignment="Stretch"  >
+            <Grid Width="180" Height="auto" VerticalAlignment="Stretch">
+                <TreeView d:ItemsSource="{d:SampleData ItemCount=20}">
+                    
+                </TreeView>
             </Grid>
         </Expander>
-        
+
         <TabControl Grid.Column="1">
             <TabItem Header="Данные по скважинам">
                 <Grid>
@@ -92,17 +127,19 @@
                     <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedHorScale}"/>
-                    
+
                     <TextBlock Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Text="Вертикальный масштаб"/>
                     <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="200,26,0,0" VerticalAlignment="Top" FontSize="14"
                   Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedVertScale}"/>
                     <!--#endregion-->
 
+                    <CheckBox Grid.Column="1" x:Name="Mode3d_CheckBox" Content="3D режим" HorizontalAlignment="Left" Margin="10,18,0,0" VerticalAlignment="Top" 
+                              IsChecked="{Binding IsMode3d, Source={x:Static properties:Settings.Default}}"/>
 
                     <!--Выбор скважин-->
                     <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                        
+
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30"/>
                             <ColumnDefinition/>
@@ -115,36 +152,40 @@
                         <!--Подписи к столбцам скважин-->
                         <Grid Grid.Column="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="37"/>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="50"/>                                        <!--Номер скважины-->
+                                <ColumnDefinition/>                                                   <!--Высота устья скважины-->    
+                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>                  <!--X устья скважины-->
+                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>                  <!--Y устья скважины-->
+                                <ColumnDefinition/>                                                   <!--Расстояние до следующей скважины-->
+                                <ColumnDefinition/>                                                   <!--Глубина скважины-->
+                                <ColumnDefinition/>                                                   <!--Разрушенные коренные породы-->
+                                <ColumnDefinition/>                                                   <!--Плотные коренные породы-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Торфа-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Мощность пласта-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Среднее содержание пласта-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Вертикальный запас пласта-->
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="№ скв."/>
                             <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="H скв."/>
-                            <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Text="S до след."/>
-                            <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Гл. скв."/>
-                            <TextBlock Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Наносы"/>
-                            <TextBlock Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Раз.Кор."/>
-                            <TextBlock Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Плот.Кор."/>
-                            <TextBlock Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Торфа"/>
-                            <TextBlock Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Пески"/>
-                            <TextBlock Grid.Column="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Сред.Сод."/>
-                            <TextBlock Grid.Column="11" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Верт.Зап."/>
+                            <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Text="X скв."/>
+                            <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Y скв."/>
+                            <TextBlock Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" Text="S до след."/>
+                            <TextBlock Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Гл. скв."/>
+                            <TextBlock Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Раз.Кор."/>
+                            <TextBlock Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Плот.Кор."/>
+                            <TextBlock Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Торфа"/>
+                            <TextBlock Grid.Column="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Пески"/>
+                            <TextBlock Grid.Column="11" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Сред.Сод."/>
+                            <TextBlock Grid.Column="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Верт.Зап."/>
                         </Grid>
                         <!--Основные данные по скважинам-->
                         <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding Wells.Count}"
-                     ItemsSource="{Binding Wells}" SelectedIndex="0" SelectedItem="{Binding SelectedItem}">
+                     ItemsSource="{Binding Wells}" SelectedIndex="0" SelectedItem="{Binding SelectedItem}" d:ItemsSource="{d:SampleData ItemCount=5}">
+
+                            
+                            
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
@@ -153,44 +194,46 @@
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="30"/>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-
+                                            <ColumnDefinition Width="50"/>                              <!--Номер скважины-->
+                                            <ColumnDefinition/>                                         <!--Высота устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>        <!--X устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>        <!--Y устья скважины-->
+                                            <ColumnDefinition/>                                         <!--Расстояние до следующей скважины-->
+                                            <ColumnDefinition/>                                         <!--Глубина скважины-->
+                                            <ColumnDefinition/>                                         <!--Разрушенные коренные породы-->
+                                            <ColumnDefinition/>                                         <!--Плотные коренные породы-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Торфа-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Мощность пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Среднее содержание пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Вертикальный запас пласта-->
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2"
                                    Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplatedParent.(ItemsControl.AlternationIndex),
                                    Converter={StaticResource PlusOneConverter}}"/>
                                         <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding WellName, Mode=TwoWay}"/>
-                                        <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding WellHeadPoint.Z}" />
-                                        <TextBox Grid.Column="3" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding DistanceToNextWell}"/>
-                                        <TextBox Grid.Column="4" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding WellDepth}" />
-                                        <TextBox Grid.Column="5" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding SoftEarthThickness}"/>
-                                        <TextBox Grid.Column="6" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding DestHardEarthThickness}"/>
-                                        <TextBox Grid.Column="7" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding SolidHardEarthThickness}" />
-                                        <TextBox Grid.Column="8" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding TurfThickness}" />
-                                        <TextBox Grid.Column="9" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding GoldLayerThickness, Mode=TwoWay}"/>
-                                        <TextBox Grid.Column="10" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding GoldLayerContentSlip, Mode=TwoWay}" />
+                                        <TextBox Grid.Column="2" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding WellHeadPoint.Z}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="3" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding WellHeadPoint.X}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="4" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding WellHeadPoint.Y}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="5" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding DistanceToNextWell}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="6" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding WellDepth}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="7" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding DestHardEarthThickness}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="8" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding SolidHardEarthThickness}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="9" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding TurfThickness}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <TextBox Grid.Column="10" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding GoldLayerThickness, Mode=TwoWay}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                         <TextBox Grid.Column="11" HorizontalAlignment="Stretch" TextAlignment="Center"
-                                     Text="{Binding VerticalGoldContent, Mode=TwoWay}" />
+                                                Text="{Binding GoldLayerContentSlip, Mode=TwoWay}" />
+                                        <TextBox Grid.Column="12" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding VerticalGoldContent, Mode=TwoWay}" 
+                                                PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -221,7 +264,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Style="{StaticResource 3d_Show_DoubleWidth}"/>
                         </Grid.ColumnDefinitions>
 
                         <!--Данные по золоту-->
@@ -256,8 +299,10 @@
                                             </Grid.ColumnDefinitions>
                                             <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteGoldData, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                     CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
-                                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"/>
-                                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"/>
+                                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"
+                                                     PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"
+                                                     PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -267,7 +312,7 @@
                         </Grid>
 
                         <!--Данные по породам-->
-                        <Grid Grid.Row="2" Grid.Column="1">
+                        <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="30"/>
                                 <RowDefinition/>
@@ -297,7 +342,8 @@
                                             <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteEarthData, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                     CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
                                             <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding earthType}" TextAlignment="Center"/>
-                                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding earthHeight}" TextAlignment="Center"/>
+                                            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding earthHeight}" TextAlignment="Center"
+                                                     PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -307,7 +353,7 @@
                     Content="+" FontSize="20" Command="{Binding AddEarthData}"/>
                         </Grid>
 
-                        <!--Данные по породам-->
+                        <!--Данные по блокам-->
                         <Grid Grid.Column="3">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="30"/>
@@ -359,7 +405,7 @@
                             <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                     Content="+" FontSize="20" Command="{Binding AddGoldLayer}"/>
                         </Grid>
-                        
+
                     </Grid>
 
 
@@ -368,16 +414,17 @@
                     <!--#region Кнопки управления-->
                     <Button Grid.Row="3" Grid.Column="0" Content="Сохранить" HorizontalAlignment="Left" Margin="20,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding SaveSegment}"/>
-                    
+
                     <Button Grid.Row="3" Grid.Column="0" Content="Загрузить" HorizontalAlignment="Left" Margin="112,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadSegment}"/>
-                    
+
                     <!--<Button Grid.Row="3" Grid.Column="1" Content="Excel" HorizontalAlignment="Left" Margin="198,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding LoadFromExcel}" Visibility="Hidden"/>-->
-                    
+
                     <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
                     CommandParameter="{Binding ElementName=MainWindow}"/>
+                    
                     <!--#endregion-->
 
                 </Grid>
@@ -385,6 +432,7 @@
             <TabItem Header="Настройки">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
@@ -426,6 +474,16 @@
                             <TextBox Text="{Binding VertScaleFontSize, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
                         </StackPanel>
                     </GroupBox>
+                    <GroupBox Grid.Row="0" Grid.Column="2" Header="Настройка 3d">
+                        <StackPanel>
+                            <CheckBox Content="Отрисовка поверхности" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовка Блока" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                            <CheckBox Content="Отрисовка коренных пород" Style="{StaticResource  SettingsTextBlock}" 
+                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                        </StackPanel>
+                    </GroupBox>
                     <GroupBox Grid.Row="1" Grid.Column="0" Header="Настройки неопределенные">
                         <StackPanel>
                             <CheckBox x:Name="IsSplit_CheckBox" Content="Разбивать разрез по длине" Style="{StaticResource  SettingsTextBlock}" 
@@ -448,17 +506,17 @@
                     <GroupBox Grid.Row="1" Grid.Column="1" Header="Настройки отрисовки">
                         <StackPanel>
                             <CheckBox Content="Отрисовывать скважины" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовывать породы" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовывать коренные породы" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawHardEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawHardEarthSurfaces, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовывать содержания" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawContents, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawContents, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовывать линейку высот" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawScaleRuller, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawScaleRuller, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовывать таблицу" Style="{StaticResource  SettingsTextBlock}" 
-                                IsChecked="{Binding DrawTable, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding DrawTable, Source={x:Static properties:Settings.Default}}"/>
                         </StackPanel>
                     </GroupBox>
 

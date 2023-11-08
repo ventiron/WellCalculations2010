@@ -298,5 +298,53 @@ namespace WellCalculations2010.Properties {
                 this["DrawScaleRuller"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsEarthSurface3dNeeded {
+            get {
+                return ((bool)(this["IsEarthSurface3dNeeded"]));
+            }
+            set {
+                this["IsEarthSurface3dNeeded"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsGoldBlock3dNeeded {
+            get {
+                return ((bool)(this["IsGoldBlock3dNeeded"]));
+            }
+            set {
+                this["IsGoldBlock3dNeeded"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsHardEarth3dNeeded {
+            get {
+                return ((bool)(this["IsHardEarth3dNeeded"]));
+            }
+            set {
+                this["IsHardEarth3dNeeded"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsMode3d {
+            get {
+                return ((bool)(this["IsMode3d"]));
+            }
+            set {
+                this["IsMode3d"] = value;
+            }
+        }
     }
 }

@@ -85,10 +85,12 @@
     <Compile Include="AutoCAD\SectionDrawer2d.cs" />
     <Compile Include="AutoCAD\SectionDrawer3d.cs" />
     <Compile Include="AutoCAD\WellPlanarDrawer.cs" />
+    <Compile Include="Converter\NotBoolConverter.cs" />
     <Compile Include="Converter\LayerAndWellConverter.cs" />
     <Compile Include="Converter\IsOddConverter.cs" />
     <Compile Include="Converter\PlusOneConverter.cs" />
     <Compile Include="Converter\RowNumberConverter.cs" />
+    <Compile Include="FileManager\FileManager.cs" />
     <Compile Include="Model\EarthData.cs" />
     <Compile Include="Model\GoldData.cs" />
     <Compile Include="Model\GoldLayer.cs" />
@@ -105,7 +107,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="AutoCAD\AutoCAD_Commands.cs" />
-    <Compile Include="AutoCAD\AutoInitial.cs" />
     <Compile Include="Commands\SimpleCommand.cs" />
     <Compile Include="View\SectionDrawer_Window.xaml.cs">
       <DependentUpon>SectionDrawer_Window.xaml</DependentUpon>
@@ -146,6 +147,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Image_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AutoCAD\AutoCADUtilities\AutoCADUtilities2010\AutoCADUtilities2010.csproj">
+      <Project>{36b4883b-96ca-459e-b3f5-66ac99412c0f}</Project>
+      <Name>AutoCADUtilities2010</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

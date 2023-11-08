@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellCalculations2010_Instal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathModule", "..\..\..\Misc\MathModule\MathModule\MathModule.csproj", "{D98DF4AC-15BC-48FE-8BE6-2DE1B2D04E80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCADUtilities2010", "..\..\AutoCAD\AutoCADUtilities\AutoCADUtilities2010\AutoCADUtilities2010.csproj", "{36B4883B-96CA-459E-B3F5-66AC99412C0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,18 @@ Global
 		{D98DF4AC-15BC-48FE-8BE6-2DE1B2D04E80}.Release|x64.Build.0 = Release|Any CPU
 		{D98DF4AC-15BC-48FE-8BE6-2DE1B2D04E80}.Release|x86.ActiveCfg = Release|Any CPU
 		{D98DF4AC-15BC-48FE-8BE6-2DE1B2D04E80}.Release|x86.Build.0 = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|x64.Build.0 = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Debug|x86.Build.0 = Debug|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|x64.ActiveCfg = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|x64.Build.0 = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|x86.ActiveCfg = Release|Any CPU
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

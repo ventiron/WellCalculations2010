@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using TriangulationAutoCAD;
+using AutoCADUtilities2010;
 using WellCalculations2010.Model;
 using WellCalculations2010.Properties;
 using MathModule.Primitives;
@@ -35,9 +35,12 @@ namespace WellCalculations2010.AutoCAD
             {
                 DrawSection(section);
             }
-
-            DrawMeshFromSectionPoints(GetSurfacePointsByLines(sections));
-            DrawMeshFromSectionPoints(GetGoldBlockTopPointsByLines(sections));
+            if (Settings.Default.IsEarthSurface3dNeeded)
+                DrawMeshFromSectionPoints(GetSurfacePointsByLines(sections));
+            if (Settings.Default.IsGoldBlock3dNeeded)
+                DrawMeshFromSectionPoints(GetGoldBlockTopPointsByLines(sections));
+            if (Settings.Default.IsHardEarth3dNeeded)
+                DrawMeshFromSectionPoints(GetGoldHardSurfacePointsByLines(sections));
         }
 
         public static void DrawSection(Section section)
@@ -56,10 +59,14 @@ namespace WellCalculations2010.AutoCAD
                 //Блочим документ потому что так надо
                 using (doc.LockDocument())
                 {
+                    AutoCADTextFormatter.FormatSectionStrings(section);
+
                     WellPlanarDrawer.ImportWells(section);
+
                     DrawWells(section);
                     DrawGoldContents(section);
                     DrawEarthTypes(section);
+                    DrawHardEarthTypes(section);
                 }
             }
             catch (System.Exception ex)
@@ -246,11 +253,7 @@ namespace WellCalculations2010.AutoCAD
                 {
                     Well well = section.Wells[i];
 
-                    if (i == 0)
-                    {
-                        Well nextWell = section.Wells.Count > 1 ? section.Wells[i + 1] : new Well();
-                        surfacePoints.Add(ExtrapolatePointWithInputZ(nextWell.WellHeadPoint, well.WellHeadPoint, well.WellHeadPoint.Z));
-                    }
+                    AddPointWithExtrapolation3d(surfacePoints, well, well.WellHeadPoint.Z, section, i);
 
                     //Отрисовываем породы
                     foreach (EarthData earthData in well.EarthDatas)
@@ -259,25 +262,8 @@ namespace WellCalculations2010.AutoCAD
                         {
                             earthDatas.Add(earthData.earthType);
                             Point3dCollection earthSurface = new Point3dCollection();
-                            //Отрисовываем экстраполяцию в начало если скважина -первая в буровой линии
-                            if (i == 0)
-                            {
-                                Well nextWell = section.Wells.Count > 1 ? section.Wells[i + 1] : new Well();
-                                earthSurface.Add(ExtrapolatePointWithInputZ(nextWell.WellHeadPoint, well.WellHeadPoint, well.WellHeadPoint.Z - earthData.earthHeight));
-                            }
-                            else
-                            {
-                                Well prevWell = section.Wells[i - 1];
-                                earthSurface.Add(GetMiddlePointWithInputZ(well.WellHeadPoint, prevWell.WellHeadPoint, well.WellHeadPoint.Z - earthData.earthHeight));
-                            }
-                            //Отрисовываем первую точку в первой скважине
-                            InterpolateAndAddPoint(earthSurface, new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, well.WellHeadPoint.Z - earthData.earthHeight));
-                            //Отрисовываем экстраполяцию в случае если только 1 скважина
-                            if (i == section.Wells.Count - 1 && i == 0)
-                            {
-                                Well prevWell = new Well();
-                                earthSurface.Add(ExtrapolatePointWithInputZ(well.WellHeadPoint, prevWell.WellHeadPoint, well.WellHeadPoint.Z - earthData.earthHeight));
-                            }
+
+                            AddPointWithExtrapolation3d(earthSurface, well, well.WellHeadPoint.Z - earthData.earthHeight, section, i);
 
                             bool isInterrupted = false;
                             for (int k = i + 1; k < section.Wells.Count; k++)
@@ -291,26 +277,8 @@ namespace WellCalculations2010.AutoCAD
                                 {
                                     EarthData nextEarthData = section.Wells[k].EarthDatas[index];
 
-                                    //При прерывании если находим в последующих скважинах нужную породу сначала добавляем точку посередине 2 скважин
-                                    if (earthSurface.Count == 0)
-                                    {
-                                        Well prevWell = section.Wells[k - 1];
-                                        Well curWell = section.Wells[k];
-                                        earthSurface.Add(GetMiddlePointWithInputZ(curWell.WellHeadPoint, prevWell.WellHeadPoint, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
-                                    }
-
-                                    //Добавляем найденную точку в коллекцию точек поверхности
-                                    InterpolateAndAddPoint(earthSurface, 
-                                        new Point3d(section.Wells[k].WellHeadPoint.X, section.Wells[k].WellHeadPoint.Y, section.Wells[k].WellHeadPoint.Z - nextEarthData.earthHeight));
-
-                                    //Если порода есть в последней скважине - экстраполируем дополнительную точку.
-                                    if (k == section.Wells.Count - 1)
-                                    {
-                                        Well prevWell = section.Wells[k - 1];
-                                        Well curWell = section.Wells[k];
-                                        earthSurface.Add(ExtrapolatePointWithInputZ(prevWell.WellHeadPoint, curWell.WellHeadPoint, curWell.WellHeadPoint.Z - nextEarthData.earthHeight));
-                                        break;
-                                    }
+                                    Well nextWell = section.Wells[k];
+                                    AddPointWithExtrapolation3d(earthSurface, nextWell, nextWell.WellHeadPoint.Z - nextEarthData.earthHeight, section, k);
                                 }
                                 else if (earthSurface.Count != 0)
                                 {
@@ -335,17 +303,6 @@ namespace WellCalculations2010.AutoCAD
                         }
                     }
 
-                    //Отрисовываем сплайн поверхности
-                    InterpolateAndAddPoint(surfacePoints, well.WellHeadPoint);
-
-                    //Экстраполируем последнюю точку земной поверхности
-                    if (i == section.Wells.Count - 1)
-                    {
-                        Well prevWell = section.Wells[i - 1];
-                        MathVector3d vector = new MathVector3d(prevWell.WellHeadPoint, well.WellHeadPoint);
-                        InterpolateAndAddPoint(surfacePoints, new Point3d(well.WellHeadPoint.X + vector.X / 2, well.WellHeadPoint.Y + vector.Y / 2, well.WellHeadPoint.Z));
-                    }
-
                 }
 
                 Spline surface = new Spline(surfacePoints, 6, 0.0);
@@ -366,118 +323,115 @@ namespace WellCalculations2010.AutoCAD
 
 
 
-        //private static void DrawHardEarthTypes(Section section)
-        //{
-        //    Document doc = Application.DocumentManager.MdiActiveDocument;
-        //    Database bd = doc.Database;
+        private static void DrawHardEarthTypes(Section section)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database bd = doc.Database;
 
-        //    bool isThereNoSolidHardEarth = true;
+            using (Transaction tr = bd.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
 
-        //    using (Transaction tr = bd.TransactionManager.StartTransaction())
-        //    {
-        //        BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
-        //        BlockTableRecord btr = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
-
-        //        Point3dCollection destEarthPoints = new Point3dCollection();
-        //        Point3dCollection solidEarthPoints = new Point3dCollection();
+                Point3dCollection destEarthPoints = new Point3dCollection();
+                Point3dCollection solidEarthPoints = new Point3dCollection();
 
 
-        //        for (int i = 0; i < section.Wells.Count; i++)
-        //        {
-        //            Well well = section.Wells[i];
+                for (int i = 0; i < section.Wells.Count; i++)
+                {
+                    Well well = section.Wells[i];
 
-        //            string destEarthTemp = well.DestHardEarthThickness.Replace(',', '.');
-        //            string solidEarthTemp = well.SolidHardEarthThickness.Replace(',', '.');
+                    string destEarthTemp = well.DestHardEarthThickness.Replace(',', '.');
+                    string solidEarthTemp = well.SolidHardEarthThickness.Replace(',', '.');
 
-        //            double solidEarth;
-        //            double.TryParse(solidEarthTemp, out solidEarth);
-        //            double destEarth;
-        //            double.TryParse(destEarthTemp, out destEarth);
+                    double solidEarth;
+                    double.TryParse(solidEarthTemp, out solidEarth);
+                    double destEarth;
+                    double.TryParse(destEarthTemp, out destEarth);
 
-        //            //Работа с плотными коренными породами
-        //            if (solidEarth != 0d)
-        //            {
-        //                AddPointWithExtrapolation2d(solidEarthPoints, currentDist,
-        //                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth),
-        //                    section, i);
-        //            }
-        //            else if (solidEarthPoints.Count != 0)
-        //            {
-        //                if (Settings.Default.AddHardEarth)
-        //                {
-        //                    AddPointWithExtrapolation2d(solidEarthPoints, currentDist,
-        //                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth - Settings.Default.AddHardEarthDist - (destEarth == 0d ? 1d : 0d)),
-        //                        section, i);
-        //                }
-        //                else
-        //                {
-        //                    InterpolateAndAddPoint(solidEarthPoints, new Point3d(
-        //                                    solidEarthPoints[solidEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-        //                                    solidEarthPoints[solidEarthPoints.Count - 1].Y, 0));
-        //                    AutoInitial.Initialize(tr, btr, new Spline(solidEarthPoints, 5, 0.0));
-        //                    solidEarthPoints = new Point3dCollection();
-        //                }
-        //            }
+                    //Работа с плотными коренными породами
+                    if (solidEarth != 0d)
+                    {
+                        AddPointWithExtrapolation3d(solidEarthPoints, well,
+                            well.WellHeadPoint.Z - well.WellDepth + solidEarth,
+                            section, i);
+                    }
+                    else if (solidEarthPoints.Count != 0 || (Settings.Default.AddHardEarth && i == 0))
+                    {
+                        if (Settings.Default.AddHardEarth)
+                        {
+                            AddPointWithExtrapolation3d(solidEarthPoints, well,
+                                well.WellHeadPoint.Z - well.WellDepth - Settings.Default.AddHardEarthDist - (destEarth == 0d ? 1d : 0d),
+                                section, i);
+                        }
+                        else
+                        {
 
-        //            //Работа с разрушенными коренными породами
-        //            if (destEarth != 0d)
-        //            {
-        //                AddPointWithExtrapolation2d(destEarthPoints, currentDist,
-        //                    basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth),
-        //                    section, i);
-        //            }
-        //            else if (destEarthPoints.Count != 0)
-        //            {
-        //                if (Settings.Default.AddHardEarth && solidEarth == 0)
-        //                {
-        //                    AddPointWithExtrapolation2d(destEarthPoints, currentDist,
-        //                        basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth - Settings.Default.AddHardEarthDist),
-        //                        section, i);
-        //                }
-        //                else
-        //                {
-        //                    InterpolateAndAddPoint(destEarthPoints, new Point3d(
-        //                                        destEarthPoints[destEarthPoints.Count - 1].X + section.Wells[i - 1].DistanceToNextWell / horScale / 2,
-        //                                        destEarthPoints[destEarthPoints.Count - 1].Y, 0));
-        //                    Spline destEarthSurf = new Spline(destEarthPoints, 5, 0.0);
-        //                    destEarthSurf.LineWeight = LineWeight.LineWeight015;
-        //                    AutoInitial.Initialize(tr, btr, destEarthSurf);
-        //                    destEarthPoints = new Point3dCollection();
-        //                }
-        //            }
+                            Well prevWell = section.Wells[i - 1];
+                            InterpolateAndAddPoint(solidEarthPoints, GetMiddlePointWithInputZ(well.WellHeadPoint, prevWell.WellHeadPoint, solidEarthPoints[solidEarthPoints.Count - 1].Z));
+                            AutoInitial.Initialize(tr, btr, new Spline(solidEarthPoints, 5, 0.0));
+                            solidEarthPoints = new Point3dCollection();
+                        }
+                    }
 
-        //        }
+                    //Работа с разрушенными коренными породами
+                    if (destEarth != 0d)
+                    {
+                        AddPointWithExtrapolation3d(destEarthPoints, well,
+                            well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth,
+                            section, i);
+                    }
+                    else if (destEarthPoints.Count != 0 || (Settings.Default.AddHardEarth && i == 0))
+                    {
+                        if (Settings.Default.AddHardEarth && solidEarth == 0)
+                        {
+                            AddPointWithExtrapolation3d(destEarthPoints, well,
+                                well.WellHeadPoint.Z - well.WellDepth + solidEarth - Settings.Default.AddHardEarthDist,
+                                section, i);
+                        }
+                        else
+                        {
+                            Well prevWell = section.Wells[i - 1];
+                            InterpolateAndAddPoint(destEarthPoints, GetMiddlePointWithInputZ(well.WellHeadPoint, prevWell.WellHeadPoint, solidEarthPoints[solidEarthPoints.Count - 1].Z));
+                            Spline destEarthSurf = new Spline(destEarthPoints, 5, 0.0);
+                            destEarthSurf.LineWeight = LineWeight.LineWeight015;
+                            AutoInitial.Initialize(tr, btr, destEarthSurf);
+                            destEarthPoints = new Point3dCollection();
+                        }
+                    }
 
-        //        Spline solidEarthSurface = new Spline(solidEarthPoints, 5, 0.0);
-        //        Spline destEarthSurface = new Spline(destEarthPoints, 5, 0.0);
-        //        destEarthSurface.LineWeight = LineWeight.LineWeight015;
-        //        if (destEarthPoints.Count != 0)
-        //            AutoInitial.Initialize(tr, btr, destEarthSurface);
-        //        if (solidEarthPoints.Count != 0)
-        //            AutoInitial.Initialize(tr, btr, solidEarthSurface);
+                }
 
-        //        //if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - InterpolatedPointsNumber)
-        //        //{
-        //        //    Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, SolidEarthHatchDist);
-        //        //    AutoInitial.Initialize(tr, btr, tempSolidSpline);
-        //        //    HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 2);
-        //        //    tempSolidSpline.Erase();
+                Spline solidEarthSurface = new Spline(solidEarthPoints, 5, 0.0);
+                Spline destEarthSurface = new Spline(destEarthPoints, 5, 0.0);
+                destEarthSurface.LineWeight = LineWeight.LineWeight015;
+                if (destEarthPoints.Count != 0)
+                    AutoInitial.Initialize(tr, btr, destEarthSurface);
+                if (solidEarthPoints.Count != 0)
+                    AutoInitial.Initialize(tr, btr, solidEarthSurface);
 
-        //        //    if (solidEarthPoints.Count == destEarthPoints.Count)
-        //        //    {
-        //        //        HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 4);
-        //        //    }
-        //        //}
-        //        //if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && isThereNoSolidHardEarth)
-        //        //{
-        //        //    Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, SolidEarthHatchDist);
-        //        //    AutoInitial.Initialize(tr, btr, tempDestSpline);
-        //        //    HatchTwoSplines(destEarthSurface, tempDestSpline, "ANSI31", 4);
-        //        //    tempDestSpline.Erase();
-        //        //}
-        //        tr.Commit();
-        //    }
-        //}
+                //        //if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - InterpolatedPointsNumber)
+                //        //{
+                //        //    Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, SolidEarthHatchDist);
+                //        //    AutoInitial.Initialize(tr, btr, tempSolidSpline);
+                //        //    HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 2);
+                //        //    tempSolidSpline.Erase();
+
+                //        //    if (solidEarthPoints.Count == destEarthPoints.Count)
+                //        //    {
+                //        //        HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 4);
+                //        //    }
+                //        //}
+                //        //if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && isThereNoSolidHardEarth)
+                //        //{
+                //        //    Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, SolidEarthHatchDist);
+                //        //    AutoInitial.Initialize(tr, btr, tempDestSpline);
+                //        //    HatchTwoSplines(destEarthSurface, tempDestSpline, "ANSI31", 4);
+                //        //    tempDestSpline.Erase();
+                //        //}
+                tr.Commit();
+            }
+        }
 
         private static void AddPointWithExtrapolation3d(Point3dCollection points, Well well, double Z, Section section, int counter)
         {
@@ -501,7 +455,7 @@ namespace WellCalculations2010.AutoCAD
             //Проверка последней точки, вносим в массим экстраполяцию последней точки
             if (counter == section.Wells.Count - 1)
             {
-                Well prevWell = section.Wells.Count > 1 ? section.Wells[section.Wells.IndexOf(well) + 1] : new Well();
+                Well prevWell = section.Wells.Count > 1 ? section.Wells[section.Wells.IndexOf(well) - 1] : new Well();
                 InterpolateAndAddPoint(points, ExtrapolatePointWithInputZ(prevWell.WellHeadPoint, well.WellHeadPoint, Z));
             }
         }
@@ -621,6 +575,7 @@ namespace WellCalculations2010.AutoCAD
 
         }
 
+
         public static List<Point3dCollection> GetSurfacePointsByLines(List<Section> sections)
         {
             List<Point3dCollection> linePoints = new List<Point3dCollection>();
@@ -656,7 +611,34 @@ namespace WellCalculations2010.AutoCAD
             }
             return linePoints;
         }
+        public static List<Point3dCollection> GetGoldHardSurfacePointsByLines(List<Section> sections)
+        {
+            List<Point3dCollection> linePoints = new List<Point3dCollection>();
+            foreach (Section section in sections)
+            {
+                Point3dCollection sectionSurfacePoints = new Point3dCollection();
+                foreach (Well well in section.Wells)
+                {
+                    double hardEarthThicknessSum;
 
+                    double.TryParse(well.DestHardEarthThickness.Replace(',', '.'), out double destHardEarthThickness);
+                    double.TryParse(well.SolidHardEarthThickness.Replace(',', '.'), out double solidHardEarthThickness);
+
+                    hardEarthThicknessSum = destHardEarthThickness + solidHardEarthThickness;
+                    
+
+                    if (hardEarthThicknessSum == 0d)
+                        hardEarthThicknessSum = -Settings.Default.AddHardEarthDist;
+
+
+                    hardEarthThicknessSum = well.WellHeadPoint.Z - well.WellDepth + hardEarthThicknessSum;
+
+                    sectionSurfacePoints.Add(new Point3d(well.WellHeadPoint.X, well.WellHeadPoint.Y, hardEarthThicknessSum));
+                }
+                if (sectionSurfacePoints.Count > 0) linePoints.Add(sectionSurfacePoints);
+            }
+            return linePoints;
+        }
 
         private static Point3d GetMiddlePointWithInputZ(Point p1, Point p2, double z)
         {

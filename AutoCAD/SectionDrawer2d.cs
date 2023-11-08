@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using TriangulationAutoCAD;
+using AutoCADUtilities2010;
 using WellCalculations2010.Model;
 
 using Section = WellCalculations2010.Model.Section;
@@ -18,6 +18,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Point = WellCalculations2010.Model.Point;
 using DocumentFormat.OpenXml.Bibliography;
 using WellCalculations2010.Properties;
+using DocumentFormat.OpenXml.Drawing.Charts;
 
 namespace WellCalculations2010.AutoCAD
 {
@@ -422,7 +423,7 @@ namespace WellCalculations2010.AutoCAD
                             basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + solidEarth),
                             section, i);
                     }
-                    else if (solidEarthPoints.Count != 0 || Settings.Default.AddHardEarth)
+                    else if (solidEarthPoints.Count != 0 || (Settings.Default.AddHardEarth && i == 0))
                     {
                         if (Settings.Default.AddHardEarth)
                         {
@@ -447,7 +448,7 @@ namespace WellCalculations2010.AutoCAD
                             basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.WellDepth + destEarth + solidEarth),
                             section, i);
                     }
-                    else if (destEarthPoints.Count != 0 || Settings.Default.AddHardEarth)
+                    else if (destEarthPoints.Count != 0 || (Settings.Default.AddHardEarth && i == 0))
                     {
                         if (Settings.Default.AddHardEarth && solidEarth == 0)
                         {
@@ -630,28 +631,39 @@ namespace WellCalculations2010.AutoCAD
 
         private static string GetGoldLayersString(Well well)
         {
-            int padding = 9;
-
-            StringBuilder depth = new StringBuilder();
-            StringBuilder thickness = new StringBuilder();
-            StringBuilder content = new StringBuilder();
-            StringBuilder verticalContent = new StringBuilder();
-            foreach (GoldLayer layer in well.GoldLayers)
+            if (Settings.Default.IsMode3d)
             {
-                depth.Append($"{layer.depth}".PadRight(padding));
-                thickness.Append($"{layer.thickness}".PadRight(padding));
-                content.Append($"{(layer.goldContent.Trim().Equals(string.Empty) ? "-" : layer.goldContent)}".PadRight(padding));
+                int padding = 9;
 
-                double parsedContent;
-                bool parsed = double.TryParse(layer.goldContent, out parsedContent);
-                verticalContent.Append($"{(parsed ? (layer.thickness * parsedContent).ToString("0,000") : "-")}".PadRight(padding));
+                StringBuilder depth = new StringBuilder();
+                StringBuilder thickness = new StringBuilder();
+                StringBuilder content = new StringBuilder();
+                StringBuilder verticalContent = new StringBuilder();
+                foreach (GoldLayer layer in well.GoldLayers)
+                {
+                    depth.Append($"{layer.depth}".PadRight(padding));
+                    thickness.Append($"{layer.thickness}".PadRight(padding));
+                    content.Append($"{(layer.goldContent.Trim().Equals(string.Empty) ? "-" : layer.goldContent)}".PadRight(padding));
+
+                    double parsedContent;
+                    bool parsed = double.TryParse(layer.goldContent, out parsedContent);
+                    verticalContent.Append($"{(parsed ? (layer.thickness * parsedContent).ToString("0,000") : "-")}".PadRight(padding));
+                }
+
+                return
+                    $"{depth}\n" +
+                    $"{thickness}\n" +
+                    $"{content}\n" +
+                    $"{verticalContent}";
             }
-
-            return 
-                $"{depth}\n" +
-                $"{thickness}\n" +
-                $"{content}\n" +
-                $"{verticalContent}";
+            else
+            {
+                return
+                    $"{well.TurfThickness}\n" +
+                    $"{well.GoldLayerThickness}\n" +
+                    $"{well.GoldLayerContentSlip}\n" +
+                    $"{well.VerticalGoldContent}";
+            }
         }
 
         /// <summary>
