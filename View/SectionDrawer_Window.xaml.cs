@@ -52,5 +52,7 @@ namespace WellCalculations2010.View
         {
             e.Handled = !IsTextAllowed(e.Text);
         }
+
+
     }
 }

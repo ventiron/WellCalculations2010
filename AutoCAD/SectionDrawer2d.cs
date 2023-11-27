@@ -51,6 +51,7 @@ namespace WellCalculations2010.AutoCAD
         private static double distFromScale = Properties.Settings.Default.DistFromScale;
 
         private static double SolidEarthHatchDist = Properties.Settings.Default.SolidEarthHatchDist;
+        private static string waterLineTypeName = "Подземные воды";
 
 
         public static void DrawSection(Section section)
@@ -116,7 +117,7 @@ namespace WellCalculations2010.AutoCAD
                             length += section.Wells[i].DistanceToNextWell / horScale;
                             if ((length + distModifier > Properties.Settings.Default.SplitDistance) || i == section.Wells.Count - 1)
                             {
-                                basePoint = new Point3d(basePoint.X + currentDist, basePoint.Y, basePoint.Z);
+                                basePoint = new Point3d(basePoint.X + length + tableLength + distBetveenSections, basePoint.Y, basePoint.Z);
 
                                 currentDist += length + tableLength + distBetveenSections;
 
@@ -241,7 +242,7 @@ namespace WellCalculations2010.AutoCAD
                         bottomHeight = basePoint.Y + GetHeightDifference(well.WellHeadPoint.Z - well.GoldDatas[j].goldHeight);
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                             new Point3d(basePoint.X + currentDist + distFromScale, bottomHeight, 0),
-                            new Point3d(basePoint.X + currentDist + distFromScale + 1, bottomHeight, 0)));
+                            new Point3d(basePoint.X + currentDist + distFromScale + 1, bottomHeight, 0), lineWeight: LineWeight.LineWeight005));
                         //Отрисовываем надпись высоты нижней риски содержания
                         AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                             AutoCADTextFormatter.ApplyAutoCADFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.', ',')}"),
@@ -255,7 +256,7 @@ namespace WellCalculations2010.AutoCAD
                             //Отрисовываем верхнюю риску содержания
                             AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                                 new Point3d(basePoint.X + currentDist + distFromScale, topHeight, 0),
-                                new Point3d(basePoint.X + currentDist + distFromScale + 1, topHeight, 0)));
+                                new Point3d(basePoint.X + currentDist + distFromScale + 1, topHeight, 0), lineWeight: LineWeight.LineWeight005));
                             //Отрисовываем надпись высоты верхней риски содержания
                             AutoInitial.Initialize(tr, btr, AutoInitial.CreateMtext(
                                 AutoCADTextFormatter.ApplyAutoCADFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
@@ -286,6 +287,8 @@ namespace WellCalculations2010.AutoCAD
         /// <param name="section">Разрез, по скважинам которого будет происходить отрисовка</param>
         private static void DrawEarthTypes(Section section)
         {
+            CreateWatedLineType();
+
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
 
@@ -348,13 +351,29 @@ namespace WellCalculations2010.AutoCAD
                                 distForEarth += section.Wells[k].DistanceToNextWell / horScale;
                                 if (isInterrupted && earthSurface.Count != 0)
                                 {
-                                    AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
+                                    Spline spline = new Spline(earthSurface, 5, 0.0);
+                                    if (earthData.earthType.ToLower().Contains("вода")) 
+                                    {
+                                        spline.ColorIndex = 3;
+                                        spline.LinetypeScale = 5.0d;
+                                        spline.Linetype = waterLineTypeName;
+                                    }
+                                    AutoInitial.Initialize(tr, btr, spline);
                                     earthSurface = new Point3dCollection();
                                     isInterrupted = false;
                                 }
                             }
                             if (earthSurface.Count != 0)
-                                AutoInitial.Initialize(tr, btr, new Spline(earthSurface, 5, 0.0));
+                            {
+                                Spline spline = new Spline(earthSurface, 5, 0.0);
+                                if (earthData.earthType.ToLower().Contains("вода"))
+                                {
+                                    spline.ColorIndex = 3;
+                                    spline.LinetypeScale = 5.0d;
+                                    spline.Linetype = waterLineTypeName;
+                                }
+                                AutoInitial.Initialize(tr, btr, spline);
+                            }
                         }
                     }
 
@@ -382,6 +401,100 @@ namespace WellCalculations2010.AutoCAD
             }
         }
 
+        private static void CreateWatedLineType()
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+                // We'll use the textstyle table to access
+
+                // the "Standard" textstyle for our text
+
+                // segment
+
+
+
+                TextStyleTable tt = (TextStyleTable)tr.GetObject(db.TextStyleTableId, OpenMode.ForRead);
+
+
+
+                // Get the linetype table from the drawing
+
+
+
+                LinetypeTable lt = (LinetypeTable)tr.GetObject(db.LinetypeTableId,OpenMode.ForWrite);
+
+
+                if (lt.Has(waterLineTypeName)) return;
+
+                // Create our new linetype table record...
+
+
+
+                LinetypeTableRecord ltr = new LinetypeTableRecord();
+
+
+
+                // ... and set its properties
+
+
+
+                ltr.Name = waterLineTypeName;
+                ltr.AsciiDescription = "Вода ---- В ---- В ---- В ----";
+                ltr.PatternLength = 0.9;
+                ltr.NumDashes = 3;
+
+
+
+                // Dash #1
+
+
+
+                ltr.SetDashLengthAt(0, 0.5);
+
+
+
+                // Dash #2
+
+
+
+                ltr.SetDashLengthAt(1, -0.2);
+                ltr.SetShapeStyleAt(1, tt["Standard"]);
+                ltr.SetShapeNumberAt(1, 0);
+                ltr.SetShapeOffsetAt(1, new Vector2d(-0.05, -0.05));
+                ltr.SetShapeScaleAt(1, 0.1);
+                ltr.SetShapeIsUcsOrientedAt(1, false);
+                ltr.SetShapeRotationAt(1, 0);
+                ltr.SetTextAt(1, "В");
+
+
+
+                // Dash #3
+
+
+
+                ltr.SetDashLengthAt(2, -0.2);
+
+
+
+                // Add the new linetype to the linetype table
+
+
+                
+                ObjectId ltId = lt.Add(ltr);
+
+                tr.AddNewlyCreatedDBObject(ltr, true);
+
+                tr.Commit();
+            }
+
+        }
+
         /// <summary>
         /// Отрисовывает линии коренных пород по табличным данным
         /// </summary>
@@ -392,7 +505,7 @@ namespace WellCalculations2010.AutoCAD
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database bd = doc.Database;
 
-            bool isThereNoSolidHardEarth = true;
+            
 
             using (Transaction tr = bd.TransactionManager.StartTransaction())
             {
@@ -403,6 +516,7 @@ namespace WellCalculations2010.AutoCAD
                 Point3dCollection solidEarthPoints = new Point3dCollection();
 
                 double currentDist = 0;
+                bool isThereNoSolidHardEarth = true;
 
                 for (int i = 0; i < section.Wells.Count; i++)
                 {
@@ -411,10 +525,8 @@ namespace WellCalculations2010.AutoCAD
                     string destEarthTemp = well.DestHardEarthThickness.Replace(',', '.');
                     string solidEarthTemp = well.SolidHardEarthThickness.Replace(',', '.');
 
-                    double solidEarth;
-                    double.TryParse(solidEarthTemp, out solidEarth);
-                    double destEarth;
-                    double.TryParse(destEarthTemp, out destEarth);
+                    double.TryParse(solidEarthTemp, out double solidEarth);
+                    double.TryParse(destEarthTemp, out double destEarth);
 
                     //Работа с плотными коренными породами
                     if (solidEarth != 0d)
@@ -482,8 +594,11 @@ namespace WellCalculations2010.AutoCAD
                 if (solidEarthPoints.Count != 0)
                     AutoInitial.Initialize(tr, btr, solidEarthSurface);
 
+
                 if (solidEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - InterpolatedPointsNumber)
                 {
+                    isThereNoSolidHardEarth = false;
+
                     Spline tempSolidSpline = CreateSplineCopyByY(solidEarthSurface, SolidEarthHatchDist);
                     AutoInitial.Initialize(tr, btr, tempSolidSpline);
                     HatchTwoSplines(solidEarthSurface, tempSolidSpline, "ANSI31", 2);
@@ -494,7 +609,13 @@ namespace WellCalculations2010.AutoCAD
                         HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 4);
                     }
                 }
-                if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && isThereNoSolidHardEarth)
+
+
+                if (Settings.Default.AddHardEarth && (destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1))
+                {
+                    HatchTwoSplines(destEarthSurface, solidEarthSurface, "ANSI31", 4);
+                }
+                else if ((destEarthPoints.Count == (section.Wells.Count + 2) * (InterpolatedPointsNumber + 1) - 1) && !isThereNoSolidHardEarth)
                 {
                     Spline tempDestSpline = CreateSplineCopyByY(destEarthSurface, SolidEarthHatchDist);
                     AutoInitial.Initialize(tr, btr, tempDestSpline);
@@ -562,7 +683,7 @@ namespace WellCalculations2010.AutoCAD
                     //Риска расстояния между скважинами
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                         new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist, 0),
-                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2, 0)));
+                        new Point3d(basePoint.X + currentDist + distFromScale, basePoint.Y - distFromTable - tableRowDist * 2, 0), lineWeight: LineWeight.LineWeight005));
                     //Надпись расстояния между скважинами
                     if (i != section.Wells.Count - 1)
                     {
@@ -592,7 +713,7 @@ namespace WellCalculations2010.AutoCAD
                     AutoInitial.Initialize(tr, btr, AutoInitial.CreateLine(
                         new Point3d(basePoint.X - xTableOffset, basePoint.Y - distFromTable - tableRowDist * i, 0),
                         new Point3d(basePoint.X + currentDist + distFromScale * 1.5,
-                        basePoint.Y - distFromTable - tableRowDist * i, 0)));
+                        basePoint.Y - distFromTable - tableRowDist * i, 0), lineWeight: LineWeight.LineWeight005));
                 }
 
                 //Отрисовываем надписи (легенду) таблицы

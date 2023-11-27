@@ -63,15 +63,15 @@ namespace WellCalculations2010.Model
         {
             Well clone = new Well();
             clone.WellHeadPoint = (Point)this.WellHeadPoint.Clone();
-            clone.WellName = this.WellName;
+            clone.WellName = this.WellName.ToString();
             clone.DistanceToNextWell = this.DistanceToNextWell;
             clone.WellDepth = this.WellDepth;
-            clone.DestHardEarthThickness = this.DestHardEarthThickness;
-            clone.SolidHardEarthThickness = this.SolidHardEarthThickness;
-            clone.TurfThickness = this.TurfThickness;
-            clone.GoldLayerThickness = this.GoldLayerThickness;
-            clone.GoldLayerContentSlip = this.GoldLayerContentSlip;
-            clone.VerticalGoldContent = this.VerticalGoldContent;
+            clone.DestHardEarthThickness = this.DestHardEarthThickness.ToString();
+            clone.SolidHardEarthThickness = this.SolidHardEarthThickness.ToString();
+            clone.TurfThickness = this.TurfThickness.ToString();
+            clone.GoldLayerThickness = this.GoldLayerThickness.ToString();
+            clone.GoldLayerContentSlip = this.GoldLayerContentSlip.ToString();
+            clone.VerticalGoldContent = this.VerticalGoldContent.ToString();
 
             ObservableCollection<GoldData> goldDatas = new ObservableCollection<GoldData>();
             ObservableCollection<EarthData> earthDatas = new ObservableCollection<EarthData>();

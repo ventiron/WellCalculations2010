@@ -31,16 +31,19 @@ namespace WellCalculations2010.AutoCAD
 
         public static void DrawSectionModel(List<Section> sections)
         {
-            foreach (Section section in sections)
+            using (Application.DocumentManager.MdiActiveDocument.LockDocument())
             {
-                DrawSection(section);
+                foreach (Section section in sections)
+                {
+                    DrawSection(section);
+                }
+                if (Settings.Default.IsEarthSurface3dNeeded)
+                    DrawMeshFromSectionPoints(GetSurfacePointsByLines(sections));
+                if (Settings.Default.IsGoldBlock3dNeeded)
+                    DrawMeshFromSectionPoints(GetGoldBlockTopPointsByLines(sections));
+                if (Settings.Default.IsHardEarth3dNeeded)
+                    DrawMeshFromSectionPoints(GetGoldHardSurfacePointsByLines(sections));
             }
-            if (Settings.Default.IsEarthSurface3dNeeded)
-                DrawMeshFromSectionPoints(GetSurfacePointsByLines(sections));
-            if (Settings.Default.IsGoldBlock3dNeeded)
-                DrawMeshFromSectionPoints(GetGoldBlockTopPointsByLines(sections));
-            if (Settings.Default.IsHardEarth3dNeeded)
-                DrawMeshFromSectionPoints(GetGoldHardSurfacePointsByLines(sections));
         }
 
         public static void DrawSection(Section section)
@@ -63,9 +66,13 @@ namespace WellCalculations2010.AutoCAD
 
                     WellPlanarDrawer.ImportWells(section);
 
+                    if(Settings.Default.DrawWells)
                     DrawWells(section);
+                    if(Settings.Default.DrawContents)
                     DrawGoldContents(section);
+                    if(Settings.Default.DrawEarthSurfaces)
                     DrawEarthTypes(section);
+                    if(Settings.Default.DrawHardEarthSurfaces)
                     DrawHardEarthTypes(section);
                 }
             }
@@ -304,11 +311,13 @@ namespace WellCalculations2010.AutoCAD
                     }
 
                 }
-
-                Spline surface = new Spline(surfacePoints, 6, 0.0);
-                surface.ColorIndex = 42;
-                surface.LineWeight = LineWeight.LineWeight015;
-                AutoInitial.Initialize(tr, btr, surface);
+                if (surfacePoints.Count != 0)
+                {
+                    Spline surface = new Spline(surfacePoints, 6, 0.0);
+                    surface.ColorIndex = 42;
+                    surface.LineWeight = LineWeight.LineWeight015;
+                    AutoInitial.Initialize(tr, btr, surface);
+                }
 
                 //Spline surfaceTemp = CreateSplineCopyByY(surface, 2);
                 //AutoInitial.Initialize(tr, btr, surfaceTemp);
@@ -318,11 +327,6 @@ namespace WellCalculations2010.AutoCAD
                 tr.Commit();
             }
         }
-
-
-
-
-
         private static void DrawHardEarthTypes(Section section)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
@@ -433,13 +437,34 @@ namespace WellCalculations2010.AutoCAD
             }
         }
 
+
+
+
+
+
+
+
+
+
         private static void AddPointWithExtrapolation3d(Point3dCollection points, Well well, double Z, Section section, int counter)
         {
             if (points.Count == 0)
             {
                 if (counter == 0)
                 {
-                    Well nextWell = section.Wells.Count > 1 ? section.Wells[section.Wells.IndexOf(well) + 1] : new Well();
+                    Well nextWell;
+
+                    if(section.Wells.Count > 1)
+                    {
+                        nextWell = section.Wells[section.Wells.IndexOf(well) + 1];
+                    }
+                    else
+                    {
+                        nextWell = (Well)section.Wells[0].Clone();
+                        nextWell.WellHeadPoint.X += 5;
+                        nextWell.WellHeadPoint.Y += 5;
+                    }
+                        
                     points.Add(ExtrapolatePointWithInputZ(nextWell.WellHeadPoint, well.WellHeadPoint, Z));
                 }
                 else
@@ -455,7 +480,18 @@ namespace WellCalculations2010.AutoCAD
             //Проверка последней точки, вносим в массим экстраполяцию последней точки
             if (counter == section.Wells.Count - 1)
             {
-                Well prevWell = section.Wells.Count > 1 ? section.Wells[section.Wells.IndexOf(well) - 1] : new Well();
+                Well prevWell;
+
+                if (section.Wells.Count > 1)
+                {
+                    prevWell = section.Wells[section.Wells.IndexOf(well) - 1];
+                }
+                else
+                {
+                    prevWell = (Well)section.Wells[0].Clone();
+                    prevWell.WellHeadPoint.X -= 5;
+                    prevWell.WellHeadPoint.Y -= 5;
+                }
                 InterpolateAndAddPoint(points, ExtrapolatePointWithInputZ(prevWell.WellHeadPoint, well.WellHeadPoint, Z));
             }
         }

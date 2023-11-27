@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using WellCalculations2010.Excel;
 using WellCalculations2010.Model;
 using WellCalculations2010.View;
 
@@ -86,6 +87,21 @@ namespace WellCalculations2010.AutoCAD
             catch (System.Exception ex)
             {
                 MessageBox.Show($"{ex.Message}\n{ex}");
+            }
+        }
+
+        [CommandMethod("Тест")]
+        public void Test()
+        {
+
+            try
+            {
+                TestClass.testSave();
+            }
+            catch (System.Exception ex)
+            {
+
+                MessageBox.Show(ex.ToString());
             }
         }
 

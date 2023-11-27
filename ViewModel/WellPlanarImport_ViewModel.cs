@@ -95,7 +95,7 @@ namespace WellCalculations2010.ViewModel
                     Window window = (Window)obj;
                     window.WindowState = WindowState.Minimized;
 
-                    List<Well> YXwells = new List<Well>();
+                    ObservableCollection<Well> YXwells = new ObservableCollection<Well>();
                     foreach (var well in Wells)
                     {
                         Well clone = (Well)well.Clone();
@@ -119,7 +119,7 @@ namespace WellCalculations2010.ViewModel
                     (saveSegment = new SimpleCommand(obj => {
                         try
                         {
-                            Section section = new Section(Wells.ToList());
+                            Section section = new Section(Wells);
 
                             OpenFileDialog fileDialog = new OpenFileDialog();
                             fileDialog.Filter = "Файл сохранения (.xml)|*.xml";

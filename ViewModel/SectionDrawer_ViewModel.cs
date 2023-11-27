@@ -16,8 +16,8 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Xml.Serialization;
 using ClosedXML.Excel;
-
-
+using WellCalculations2010.Excel;
+using MathModule.Primitives;
 
 namespace WellCalculations2010.ViewModel
 {
@@ -25,8 +25,9 @@ namespace WellCalculations2010.ViewModel
     {
         
         public static ObservableCollection<string> Scales { get; set; }
-        public static ObservableCollection<Well> Wells { get; set; }
-        public static ObservableCollection<String> Hatchpat { get; set; } = new ObservableCollection<string>();
+        //public static ObservableCollection<Well> Wells { get; set; }
+        public static ObservableCollection<Section> Sections { get; set; }
+        public ObservableCollection<Section> LongitudinalSection { get; set; }
 
 
         public SectionDrawer_ViewModel()
@@ -49,112 +50,93 @@ namespace WellCalculations2010.ViewModel
                 "1:25000",
                 "1:50000"
             };
-
-            Wells = new ObservableCollection<Well>()
+            Sections = new ObservableCollection<Section>()
             {
-                new Well()
+                new Section()
             };
 
-            //Wells = CreateRandomData(1000);
-            SelectedItem = Wells[0];
+            SelectedSection = Sections[0];
+            SelectedSection.Wells.Add(new Well());
+            SelectedWell = SelectedSection.Wells[0];
+
+            LongitudinalSection = new ObservableCollection<Section>
+            {
+                new Section()
+            };
+            LongitudinalSection[0].FileName = "Продольник.xml";
         }
 
-        private static string selectedVertScale = "1:100";
-        public string SelectedVertScale
+
+
+
+        private Section selectedSection;
+        public Section SelectedSection
         {
-            get { return selectedVertScale; }
+            get { return selectedSection; }
             set
             {
-                selectedVertScale = value;
-                OnPropertyChanged("SelectedVertScale");
+                selectedSection = value;
+                OnPropertyChanged(nameof(SelectedSection));
             }
         }
 
 
-        private static string selectedHorScale = "1:500";
-        public string SelectedHorScale
+        private Well selectedWell;
+        public Well SelectedWell
         {
-            get { return selectedHorScale; }
+            get { return selectedWell; }
             set
             {
-                selectedHorScale = value;
-                OnPropertyChanged("SelectedHorScale");
+                selectedWell = value;
+                OnPropertyChanged(nameof(SelectedWell));
             }
         }
 
 
-        private static Well selectedItem;
-        public Well SelectedItem
-        {
-            get { return selectedItem; }
-            set
-            {
-                selectedItem = value;
-                OnPropertyChanged("SelectedItem");
-            }
-        }
-
-        private static GoldData selectedGoldData;
+        private GoldData selectedGoldData;
         public GoldData SelectedGoldData
         {
             get { return selectedGoldData; }
             set
             {
                 selectedGoldData = value;
-                OnPropertyChanged("SelectedGoldData");
+                OnPropertyChanged(nameof(SelectedGoldData));
             }
         }
-        private static EarthData selectedEarthData;
+
+
+        private EarthData selectedEarthData;
         public EarthData SelectedEarthData
         {
             get { return selectedEarthData; }
             set
             {
                 selectedEarthData = value;
-                OnPropertyChanged("SelectedEarthData");
+                OnPropertyChanged(nameof(SelectedEarthData));
             }
         }
 
-        private static bool goldContentIsBottom = true;
-        public bool GoldContentIsBottom
+
+        private int mainSelectionIndex = 1;
+        public int MainSelectionIndex
         {
-            get { return goldContentIsBottom; }
+            get { return mainSelectionIndex; }
             set
             {
-                goldContentIsBottom = value;
-                OnPropertyChanged("GoldContentIsBottom");
+                mainSelectionIndex = value;
+                OnPropertyChanged(nameof(MainSelectionIndex));
             }
         }
-  
+
+
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string prop = "")
         {
-            //this.VerifyPropertyName(prop);
-
-            //PropertyChangedEventHandler handler = this.PropertyChanged;
-            //if (handler != null)
-            //{
-            //    var e = new PropertyChangedEventArgs(prop);
-            //    handler(this, e);
-            //}
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-
-        //public void VerifyPropertyName(string propertyName)
-        //{
-        //    // Verify that the property name matches a real,  
-        //    // public, instance property on this object.
-        //    if (TypeDescriptor.GetProperties(this)[propertyName] == null)
-        //    {
-        //        string msg = "Invalid property name: " + propertyName;
-
-        //        if (this.ThrowOnInvalidPropertyName)
-        //            throw new Exception(msg);
-        //        else
-        //            Debug.Fail(msg);
-        //    }
-        //}
 
 
         //Функции добавления скважин, содержаний, пород.
@@ -166,13 +148,14 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return addWell == null ?
-                    (addWell = new SimpleCommand(obj => {
-                        if (Wells.Count == 0)
+                    (addWell = new SimpleCommand(obj =>
+                    {
+                        if (SelectedSection.Wells.Count == 0)
                         {
-                            Wells.Add(new Well());
+                            SelectedSection.Wells.Add(new Well());
                             return;
                         }
-                        Wells.Insert(Wells.IndexOf(selectedItem) + 1, new Well());
+                        SelectedSection.Wells.Insert(SelectedSection.Wells.IndexOf(selectedWell) + 1, new Well());
 
                     })) : addWell;
             }
@@ -184,7 +167,7 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return addGoldData == null ?
-                    (addGoldData = new SimpleCommand(obj => { if (SelectedItem != null) SelectedItem.GoldDatas.Add(new GoldData()); })) : addGoldData;
+                    (addGoldData = new SimpleCommand(obj => { if (SelectedWell != null) SelectedWell.GoldDatas.Add(new GoldData()); })) : addGoldData;
             }
         }
 
@@ -194,7 +177,7 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return addEarthData == null ?
-                    (addEarthData = new SimpleCommand(obj => { if(SelectedItem!=null) SelectedItem.EarthDatas.Add(new EarthData()); })) : addEarthData;
+                    (addEarthData = new SimpleCommand(obj => { if (SelectedWell != null) SelectedWell.EarthDatas.Add(new EarthData()); })) : addEarthData;
             }
         }
         private SimpleCommand addGoldLayer;
@@ -203,24 +186,41 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return addGoldLayer == null ?
-                    (addGoldLayer = new SimpleCommand(obj => { if (SelectedItem != null) SelectedItem.GoldLayers.Add(new GoldLayer()); })) : addGoldLayer;
+                    (addGoldLayer = new SimpleCommand(obj => { if (SelectedWell != null) SelectedWell.GoldLayers.Add(new GoldLayer()); })) : addGoldLayer;
             }
         }
         #endregion
 
         #region [Delete commands]
+        private SimpleCommand deleteSection;
+        public SimpleCommand DeleteSection
+        {
+            get
+            {
+                return deleteSection == null ?
+                    (deleteSection = new SimpleCommand(obj =>
+                    {
+                        Sections.Remove((Section) obj);
+                        if (Sections.Count > 0) SelectedSection = Sections[0];
+                    })) : deleteSection;
+            }
+        }
+
+
         private SimpleCommand deleteWell;
         public SimpleCommand DeleteWell
         {
             get
             {
                 return deleteWell == null ?
-                    (deleteWell = new SimpleCommand(obj => {
-                        Wells.Remove(SelectedItem);
-                        if (Wells.Count > 0) SelectedItem = Wells[0];
+                    (deleteWell = new SimpleCommand(obj =>
+                    {
+                        SelectedSection.Wells.Remove(SelectedWell);
+                        if (SelectedSection.Wells.Count > 0) SelectedWell = SelectedSection.Wells[0];
                     })) : deleteWell;
             }
         }
+
 
         private SimpleCommand deleteGoldData;
         public SimpleCommand DeleteGoldData
@@ -228,11 +228,13 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return deleteGoldData == null ?
-                    (deleteGoldData = new SimpleCommand(obj => {
-                        SelectedItem.GoldDatas.Remove((GoldData)obj);
+                    (deleteGoldData = new SimpleCommand(obj =>
+                    {
+                        SelectedWell.GoldDatas.Remove((GoldData)obj);
                     })) : deleteGoldData;
             }
         }
+
 
         private SimpleCommand deleteEarthData;
         public SimpleCommand DeleteEarthData
@@ -240,20 +242,24 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return deleteEarthData == null ?
-                    (deleteEarthData = new SimpleCommand(obj => {
-                        SelectedItem.EarthDatas.Remove((EarthData) obj);
+                    (deleteEarthData = new SimpleCommand(obj =>
+                    {
+                        SelectedWell.EarthDatas.Remove((EarthData)obj);
                     })) : deleteEarthData;
             }
         }
+
+
         private SimpleCommand deleteGoldLayer;
         public SimpleCommand DeleteGoldLayer
         {
             get
             {
                 return deleteGoldLayer == null ?
-                    (deleteGoldLayer = new SimpleCommand(obj => {
-                        if(selectedItem.GoldLayers.Count != 1)
-                            SelectedItem.GoldLayers.Remove((GoldLayer)obj);
+                    (deleteGoldLayer = new SimpleCommand(obj =>
+                    {
+                        if (selectedWell.GoldLayers.Count != 1)
+                            SelectedWell.GoldLayers.Remove((GoldLayer)obj);
                     })) : deleteGoldLayer;
             }
         }
@@ -266,16 +272,17 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return swapWellsUp == null ?
-                    (swapWellsUp = new SimpleCommand(obj => {
-                        int index = Wells.IndexOf(SelectedItem);
+                    (swapWellsUp = new SimpleCommand(obj =>
+                    {
+                        int index = SelectedSection.Wells.IndexOf(SelectedWell);
                         if (index > 0 && index != -1)
                         {
-                            Wells.Insert(index - 1, SelectedItem);
-                            Wells.RemoveAt(index + 1);
-                            SelectedItem = Wells[index - 1];
+                            SelectedSection.Wells.Insert(index - 1, SelectedWell);
+                            SelectedSection.Wells.RemoveAt(index + 1);
+                            SelectedWell = SelectedSection.Wells[index - 1];
                         }
-                        
-                    
+
+
                     })) : swapWellsUp;
             }
         }
@@ -285,13 +292,14 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return swapWellsDown == null ?
-                    (swapWellsDown = new SimpleCommand(obj => {
-                        int index = Wells.IndexOf(SelectedItem);
-                        if (index < Wells.Count-1 && index != -1)
+                    (swapWellsDown = new SimpleCommand(obj =>
+                    {
+                        int index = SelectedSection.Wells.IndexOf(SelectedWell);
+                        if (index < SelectedSection.Wells.Count - 1 && index != -1)
                         {
-                            Wells.Insert(index + 2, SelectedItem);
-                            Wells.RemoveAt(index);
-                            SelectedItem = Wells[index + 1];
+                            SelectedSection.Wells.Insert(index + 2, SelectedWell);
+                            SelectedSection.Wells.RemoveAt(index);
+                            SelectedWell = SelectedSection.Wells[index + 1];
                         }
 
 
@@ -300,24 +308,20 @@ namespace WellCalculations2010.ViewModel
         }
         #endregion
 
-        private SimpleCommand print;
-        public SimpleCommand Print
+        private SimpleCommand test;
+        public SimpleCommand Test
         {
             get
             {
-                return saveSegment == null ?
-                    (saveSegment = new SimpleCommand(obj => {
-                        try
-                        {
-                            MessageBox.Show(obj.ToString());
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message);
-                        }
-                    })) : saveSegment;
+                return test == null ?
+                    (test = new SimpleCommand(obj =>
+                    {
+                        //TestClass.testSave();
+                    })) : test;
             }
         }
+
+        #region [Section interactions]
 
         private SimpleCommand saveSegment;
         public SimpleCommand SaveSegment
@@ -325,12 +329,10 @@ namespace WellCalculations2010.ViewModel
             get
             {
                 return saveSegment == null ?
-                    (saveSegment = new SimpleCommand(obj => {
+                    (saveSegment = new SimpleCommand(obj =>
+                    {
                         try
                         {
-                            Section section = new Section(Wells.ToList());
-                            section.HorizontalScale = selectedHorScale;
-                            section.VerticalScale = selectedVertScale;
 
 
 
@@ -340,10 +342,11 @@ namespace WellCalculations2010.ViewModel
                             fileDialog.CheckPathExists = true;
                             if (fileDialog.ShowDialog() == true)
                             {
-                                section.SaveSection(fileDialog.FileName);
+                                SelectedSection.SaveSection(fileDialog.FileName);
+                                OnPropertyChanged("FileName");
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             MessageBox.Show(ex.Message);
                         }
@@ -351,37 +354,37 @@ namespace WellCalculations2010.ViewModel
             }
         }
 
+
         private SimpleCommand loadSegment;
         public SimpleCommand LoadSegment
         {
             get
             {
-                
-                    return loadSegment == null ?
-                    (loadSegment = new SimpleCommand(obj =>
+
+                return loadSegment == null ?
+                (loadSegment = new SimpleCommand(obj =>
+                {
+                    try
                     {
-                        try
-                        {
-                            //SelectedItem.EarthDatas.delete(new EarthData()); 
-                            Section section = new Section();
+                        
 
-                            OpenFileDialog fileDialog = new OpenFileDialog();
-                            fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
-                            fileDialog.CheckFileExists = false;
-                            fileDialog.CheckPathExists = true;
-                            if (fileDialog.ShowDialog() == true)
-                            {
-                                section = Section.LoadSection(fileDialog.FileName);
-                                Wells.Clear();
-                                foreach (Well well in section.Wells) Wells.Add(well);
-                            }
-                        }
-                        catch (Exception ex)
+                        OpenFileDialog fileDialog = new OpenFileDialog();
+                        fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                        fileDialog.CheckFileExists = false;
+                        fileDialog.CheckPathExists = true;
+                        if (fileDialog.ShowDialog() == true)
                         {
-                            MessageBox.Show(ex.Message);
+                            Section section = Section.LoadSection(fileDialog.FileName);
+                            Sections.Add(section);
+                            SelectedSection = section;
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
 
-            })) : loadSegment;
+                })) : loadSegment;
             }
         }
 
@@ -394,24 +397,48 @@ namespace WellCalculations2010.ViewModel
                 return drawSegment == null ?
                     (drawSegment = new SimpleCommand(obj =>
                     {
-                        List<Well> wells = new List<Well>();
-                        foreach (Well well in Wells)
-                        {
-                            wells.Add((Well)well.Clone());
-                        }
-                        Section section = new Section(wells);
-                        section.HorizontalScale = selectedHorScale.ToString();
-                        section.VerticalScale = selectedVertScale.ToString();
-                        if (true)
-                        {
-                            ((Window)obj).WindowState = WindowState.Minimized;
-                            SectionDrawer2d.DrawSection(section);
-                            return;
-                        }
+
+                        ((Window)obj).WindowState = WindowState.Minimized;
+                        SectionDrawer2d.DrawSection((Section)SelectedSection.Clone());
+                        return;
+
 
                     })) : drawSegment;
             }
         }
+
+
+        private SimpleCommand drawSegments3d;
+        public SimpleCommand DrawSegments3d
+        {
+            get
+            {
+                return drawSegments3d == null ?
+                    (drawSegments3d = new SimpleCommand(obj =>
+                    {
+
+                        try
+                        {
+                            ((Window)obj).WindowState = WindowState.Minimized;
+                            List<Section> sectionsClone = new List<Section>();
+                            foreach (Section section in Sections)
+                            {
+                                sectionsClone.Add((Section)section.Clone());
+                            }
+                            SectionDrawer3d.DrawSectionModel(sectionsClone);
+                            return;
+                        }
+                        catch (Exception ex)
+                        {
+
+                            MessageBox.Show(ex.ToString());
+                        }
+
+
+                    })) : drawSegments3d;
+            }
+        }
+        #endregion
 
 
         private SimpleCommand saveSettings;
@@ -427,93 +454,69 @@ namespace WellCalculations2010.ViewModel
             }
         }
 
-
-
-
-        //private SimpleCommand loadFromExcel;
-        //public SimpleCommand LoadFromExcel
-        //{
-        //    get
-        //    {
-        //        return loadFromExcel == null ?
-        //            (loadFromExcel = new SimpleCommand(obj =>
-        //            {
-        //                try
-        //                {
-        //                    OpenFileDialog fileDialog = new OpenFileDialog();
-        //                    fileDialog.Filter = "Файл Excel (.xlsx)|*.xlsx";
-        //                    fileDialog.CheckFileExists = true;
-        //                    fileDialog.CheckPathExists = true;
-        //                    if (fileDialog.ShowDialog() == true)
-        //                    {
-        //                        XLWorkbook wb = new XLWorkbook(fileDialog.FileName);
-        //                        IXLWorksheet worksheet = wb.Worksheets.Worksheet("Скважины");
-        //                        IXLTable table = worksheet.Table("Well");
-        //                        IXLTableRows rows = table.DataRange.Rows();
-
-        //                        ObservableCollection<Well> newWells = new ObservableCollection<Well>();
-        //                        foreach(IXLTableRow row in rows)
-        //                        {
-        //                            Well well = new Well();
-        //                            well.WellName = row.Cell(2).GetValue<string>();
-        //                            newWells.Add(well);
-        //                        }
-
-        //                        StringBuilder sb = new StringBuilder();
-        //                        foreach (Well well1 in newWells)
-        //                            sb.Append(well1.WellName);
-        //                        MessageBox.Show(sb.ToString() + "\n");
-
-        //                        wb.Save();
-
-        //                    }
-        //                } catch (Exception ex)
-        //                {
-        //                    MessageBox.Show(ex.Message);
-        //                }
-        //            })) : loadFromExcel;
-        //    }
-        //}
-
-
-
-
-
-
-
-        private bool ValidateSection(Section section)
+        private SimpleCommand addWellToLongitudinalSection;
+        public SimpleCommand AddWellToLongitudinalSection
         {
-            for(int i = 0; i < Wells.Count; i++)
+            get
             {
-                if(!(ValidateGoldData(section.Wells[i]) && ValidateEarthData(section.Wells[i]))) return false;
-            }
-            return true;
-        }
-        private bool ValidateGoldData(Well well)
-        {
-            List<double> data = new List<double>();
-            foreach(GoldData goldData in well.GoldDatas)
-            {
-                if(goldData.goldHeight > well.WellDepth || goldData.goldHeight < 0)
+
+                return addWellToLongitudinalSection == null ?
+                (addWellToLongitudinalSection = new SimpleCommand(obj =>
                 {
-                    return false;
+                    Well OriginalWell = (Well)obj;
+                    Well wellClone = (Well)OriginalWell.Clone();
+
+                    if (LongitudinalSection[0].Wells.Count > 0)
+                    {
+                        Well prewWell = LongitudinalSection[0].Wells[LongitudinalSection[0].Wells.Count - 1];
+                        MathVector3d vector = new MathVector3d(prewWell.WellHeadPoint, wellClone.WellHeadPoint);
+                        prewWell.DistanceToNextWell = vector.Dist2d;
+                    }
+                    LongitudinalSection[0].Wells.Add(wellClone);
+                })) : addWellToLongitudinalSection;
+            }
+        }
+
+
+        private SimpleCommand setSelectionOnLongitudinalSection;
+        public SimpleCommand SetSelectionOnLongitudinalSection
+        {
+            get
+            {
+
+                return setSelectionOnLongitudinalSection == null ?
+                (setSelectionOnLongitudinalSection = new SimpleCommand(obj =>
+                {
+                    MainSelectionIndex = -1;
+                    SelectedSection = LongitudinalSection[0];
+
+                })) : setSelectionOnLongitudinalSection;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        private bool isEarthTypePresent(string earthType)
+        {
+            foreach (Well well in SelectedSection.Wells)
+            {
+                foreach (EarthData earthData in well.EarthDatas)
+                {
+                    if (earthData.earthType.Equals(earthType)) return true;
                 }
             }
-            return true;
+            return false;
         }
-        private bool ValidateEarthData(Well well)
-        {
-            List<double> data = new List<double>();
-            foreach (EarthData earthData in well.EarthDatas)
-            {
-                if (earthData.earthHeight > well.WellDepth || earthData.earthHeight < 0 || data.Contains(earthData.earthHeight))
-                {
-                    return false;
-                }
-                data.Add(earthData.earthHeight);
-            }
-            return true;
-        }
+
 
         //private static ObservableCollection<Well> CreateRandomData(int counter)
         //{

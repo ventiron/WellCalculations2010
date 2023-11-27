@@ -14,6 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellCalculations2010_Instal
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathModule", "..\..\..\Misc\MathModule\MathModule\MathModule.csproj", "{D98DF4AC-15BC-48FE-8BE6-2DE1B2D04E80}"
+	ProjectSection(ProjectDependencies) = postProject
+		{36B4883B-96CA-459E-B3F5-66AC99412C0F} = {36B4883B-96CA-459E-B3F5-66AC99412C0F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCADUtilities2010", "..\..\AutoCAD\AutoCADUtilities\AutoCADUtilities2010\AutoCADUtilities2010.csproj", "{36B4883B-96CA-459E-B3F5-66AC99412C0F}"
 EndProject

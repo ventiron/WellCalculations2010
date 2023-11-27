@@ -10,6 +10,7 @@
              mc:Ignorable="d" 
              x:Name="MainWindow"
              Height="650" Width="1200" >
+
     <Window.DataContext>
         <VM:SectionDrawer_ViewModel/>
     </Window.DataContext>
@@ -18,6 +19,8 @@
         <converter:RowNumberConverter x:Key="RowNumberConverter"/>
         <converter:IsOddConverter x:Key="IsOddConverter"/>
         <converter:PlusOneConverter x:Key="PlusOneConverter"/>
+
+
 
         <Style x:Key="SettingsTextBox">
             <Setter Property="Control.Height" Value="23"/>
@@ -100,11 +103,32 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Expander ExpandDirection="Left" HorizontalAlignment="Right" VerticalAlignment="Stretch" IsExpanded="False"  VerticalContentAlignment="Stretch"  >
+        <Expander ExpandDirection="Left" HorizontalAlignment="Right" VerticalAlignment="Stretch" IsExpanded="False"  VerticalContentAlignment="Stretch" >
             <Grid Width="180" Height="auto" VerticalAlignment="Stretch">
-                <TreeView d:ItemsSource="{d:SampleData ItemCount=20}">
-                    
-                </TreeView>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+
+                <ListBox Grid.Row="0" HorizontalContentAlignment="Stretch" AlternationCount="2" SelectedIndex="{Binding MainSelectionIndex}" 
+                          ItemsSource="{Binding Sections}" SelectedItem="{Binding SelectedSection}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteSection, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                    CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
+                                <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding FileName, Mode=TwoWay}" TextAlignment="Center" PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Button Grid.Row="1" Content="{Binding LongitudinalSection[0].FileName}" Style="{StaticResource Transparent}" Command="{Binding SetSelectionOnLongitudinalSection}"/>
             </Grid>
         </Expander>
 
@@ -126,16 +150,16 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Горизонтальный масштаб" Grid.ColumnSpan="2" Margin="10,0,390,0"/>
                     <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" FontSize="14"
-                  Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedHorScale}"/>
+                  Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedSection.HorizontalScale}"/>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Margin="200,0,0,0" Text="Вертикальный масштаб"/>
                     <ComboBox Grid.Row="0" Grid.Column="0" 
                   HorizontalAlignment="Left" Margin="200,26,0,0" VerticalAlignment="Top" FontSize="14"
-                  Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedVertScale}"/>
+                  Width="140" Height="24" ItemsSource="{Binding Scales}" SelectedItem="{Binding SelectedSection.VerticalScale}"/>
                     <!--#endregion-->
 
                     <CheckBox Grid.Column="1" x:Name="Mode3d_CheckBox" Content="3D режим" HorizontalAlignment="Left" Margin="10,18,0,0" VerticalAlignment="Top" 
-                              IsChecked="{Binding IsMode3d, Source={x:Static properties:Settings.Default}}"/>
+                              IsChecked="{Binding IsMode3d, Source={x:Static properties:Settings.Default}}" />
 
                     <!--Выбор скважин-->
                     <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
@@ -153,18 +177,30 @@
                         <Grid Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="35"/>
-                                <ColumnDefinition Width="50"/>                                        <!--Номер скважины-->
-                                <ColumnDefinition/>                                                   <!--Высота устья скважины-->    
-                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>                  <!--X устья скважины-->
-                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>                  <!--Y устья скважины-->
-                                <ColumnDefinition/>                                                   <!--Расстояние до следующей скважины-->
-                                <ColumnDefinition/>                                                   <!--Глубина скважины-->
-                                <ColumnDefinition/>                                                   <!--Разрушенные коренные породы-->
-                                <ColumnDefinition/>                                                   <!--Плотные коренные породы-->
-                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Торфа-->
-                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Мощность пласта-->
-                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Среднее содержание пласта-->
-                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>                  <!--Вертикальный запас пласта-->
+                                <ColumnDefinition Width="50"/>
+                                <!--Номер скважины-->
+                                <ColumnDefinition/>
+                                <!--Высота устья скважины-->
+                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>
+                                <!--X устья скважины-->
+                                <ColumnDefinition Style="{StaticResource 3d_Show}"/>
+                                <!--Y устья скважины-->
+                                <ColumnDefinition/>
+                                <!--Расстояние до следующей скважины-->
+                                <ColumnDefinition/>
+                                <!--Глубина скважины-->
+                                <ColumnDefinition/>
+                                <!--Разрушенные коренные породы-->
+                                <ColumnDefinition/>
+                                <!--Плотные коренные породы-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                <!--Торфа-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                <!--Мощность пласта-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                <!--Среднее содержание пласта-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/> <!--Вертикальный запас пласта-->
+                                <ColumnDefinition Width="20"/> <!--Кнопка добавки к продольнику-->
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="№ скв."/>
@@ -181,11 +217,11 @@
                             <TextBlock Grid.Column="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Верт.Зап."/>
                         </Grid>
                         <!--Основные данные по скважинам-->
-                        <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding Wells.Count}"
-                     ItemsSource="{Binding Wells}" SelectedIndex="0" SelectedItem="{Binding SelectedItem}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                        <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="{Binding SelectedSection.Wells.Count}"
+                     ItemsSource="{Binding SelectedSection.Wells}" SelectedIndex="0" SelectedItem="{Binding SelectedWell}" d:ItemsSource="{d:SampleData ItemCount=5}">
 
-                            
-                            
+
+
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
@@ -194,18 +230,19 @@
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="30"/>
-                                            <ColumnDefinition Width="50"/>                              <!--Номер скважины-->
-                                            <ColumnDefinition/>                                         <!--Высота устья скважины-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>        <!--X устья скважины-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>        <!--Y устья скважины-->
-                                            <ColumnDefinition/>                                         <!--Расстояние до следующей скважины-->
-                                            <ColumnDefinition/>                                         <!--Глубина скважины-->
-                                            <ColumnDefinition/>                                         <!--Разрушенные коренные породы-->
-                                            <ColumnDefinition/>                                         <!--Плотные коренные породы-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Торфа-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Мощность пласта-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Среднее содержание пласта-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>        <!--Вертикальный запас пласта-->
+                                            <ColumnDefinition Width="50"/>                        <!--Номер скважины-->
+                                            <ColumnDefinition/>                                   <!--Высота устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>  <!--X устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>  <!--Y устья скважины-->
+                                            <ColumnDefinition/>                                   <!--Расстояние до следующей скважины-->
+                                            <ColumnDefinition/>                                   <!--Глубина скважины-->
+                                            <ColumnDefinition/>                                   <!--Разрушенные коренные породы-->
+                                            <ColumnDefinition/>                                   <!--Плотные коренные породы-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Торфа-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Мощность пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Среднее содержание пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Вертикальный запас пласта-->
+                                            <ColumnDefinition Width="20"/>                        <!--Вертикальный запас пласта-->
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2"
@@ -234,6 +271,8 @@
                                                 Text="{Binding GoldLayerContentSlip, Mode=TwoWay}" />
                                         <TextBox Grid.Column="12" HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding VerticalGoldContent, Mode=TwoWay}" 
                                                 PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                        <Button Grid.Column="13" Content="о" Command="{Binding DataContext.AddWellToLongitudinalSection, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -288,7 +327,7 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                     ItemsSource="{Binding SelectedItem.GoldDatas}" SelectedIndex="1" SelectedItem="{Binding SelectedGoldData}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                     ItemsSource="{Binding SelectedWell.GoldDatas}" SelectedIndex="1" SelectedItem="{Binding SelectedGoldData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -330,7 +369,7 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                                    ItemsSource="{Binding SelectedItem.EarthDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                                    ItemsSource="{Binding SelectedWell.EarthDatas}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -378,7 +417,7 @@
                             </Grid>
 
                             <ListBox Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Stretch" AlternationCount="2"
-                                     ItemsSource="{Binding SelectedItem.GoldLayers}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                                     ItemsSource="{Binding SelectedWell.GoldLayers}" SelectedIndex="0" SelectedItem="{Binding SelectedEarthData}" d:ItemsSource="{d:SampleData ItemCount=5}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -425,6 +464,11 @@
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
                     CommandParameter="{Binding ElementName=MainWindow}"/>
                     
+                    
+                    <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать 3д" HorizontalAlignment="Left" Margin="144,0,0,0"
+                        VerticalAlignment="Center" Height="35" Width="117" Command="{Binding DrawSegments3d}"
+                        CommandParameter="{Binding ElementName=MainWindow}"/>
+
                     <!--#endregion-->
 
                 </Grid>
@@ -477,11 +521,11 @@
                     <GroupBox Grid.Row="0" Grid.Column="2" Header="Настройка 3d">
                         <StackPanel>
                             <CheckBox Content="Отрисовка поверхности" Style="{StaticResource  SettingsTextBlock}" 
-                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding IsEarthSurface3dNeeded, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовка Блока" Style="{StaticResource  SettingsTextBlock}" 
-                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding IsGoldBlock3dNeeded, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовка коренных пород" Style="{StaticResource  SettingsTextBlock}" 
-                                    IsChecked="{Binding DrawWells, Source={x:Static properties:Settings.Default}}"/>
+                                    IsChecked="{Binding IsHardEarth3dNeeded, Source={x:Static properties:Settings.Default}}"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Grid.Column="0" Header="Настройки неопределенные">
