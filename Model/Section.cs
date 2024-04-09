@@ -49,10 +49,22 @@ namespace WellCalculations2010.Model
             }
         }
 
-        public static Section LoadSection(string path)
+        public static Section LoadSection(string path="")
         {
             try
             {
+                if (!File.Exists(path))
+                {
+                    OpenFileDialog fileDialog = new OpenFileDialog();
+                    fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                    fileDialog.CheckFileExists = false;
+                    fileDialog.CheckPathExists = true;
+                    if (fileDialog.ShowDialog() != true)
+                    {
+                        return new Section();
+                    }
+                    path = fileDialog.FileName;
+                }
                 using (StreamReader fs = new StreamReader(path, Encoding.GetEncoding(1251)))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section),new Type[] {typeof(MathPoint), typeof(Point3d), typeof(PolylineVertex3d)});
@@ -84,17 +96,38 @@ namespace WellCalculations2010.Model
             }
         }
 
-        public void SaveSection(string path)
+        public void SaveSection(string path="")
         {
-            using (FileStream fs = new FileStream(path, FileMode.Create))
+            try
             {
-                using (StreamWriter writer = new StreamWriter(fs, Encoding.GetEncoding(1251)))
+                if (!File.Exists(path))
                 {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section), new Type[] { typeof(MathPoint), typeof(Point3d), typeof(PolylineVertex3d) });
-                    xmlSerializer.Serialize(writer, this);
-
-                    this.FileName = new FileInfo(path).Name;
+                    OpenFileDialog fileDialog = new OpenFileDialog();
+                    fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                    fileDialog.CheckFileExists = false;
+                    fileDialog.CheckPathExists = true;
+                    if (fileDialog.ShowDialog() != true)
+                    {
+                        return;
+                    }
+                    path = fileDialog.FileName;
                 }
+
+                using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    using (StreamWriter writer = new StreamWriter(fs, Encoding.GetEncoding(1251)))
+                    {
+                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(Section), new Type[] { typeof(MathPoint), typeof(Point3d), typeof(PolylineVertex3d) });
+                        xmlSerializer.Serialize(writer, this);
+
+                        this.FileName = new FileInfo(path).Name;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
             }
         }
 

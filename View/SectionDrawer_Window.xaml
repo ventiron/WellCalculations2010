@@ -129,6 +129,7 @@
                 </ListBox>
 
                 <Button Grid.Row="1" Content="{Binding LongitudinalSection[0].FileName}" Style="{StaticResource Transparent}" Command="{Binding SetSelectionOnLongitudinalSection}"/>
+                <Button Grid.Row="2" Content="Добавить разрез" Style="{StaticResource Transparent}" Command="{Binding AddSection}"/>
             </Grid>
         </Expander>
 
@@ -199,8 +200,10 @@
                                 <!--Мощность пласта-->
                                 <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
                                 <!--Среднее содержание пласта-->
-                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/> <!--Вертикальный запас пласта-->
-                                <ColumnDefinition Width="20"/> <!--Кнопка добавки к продольнику-->
+                                <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                <!--Вертикальный запас пласта-->
+                                <ColumnDefinition Width="40"/>
+                                <!--Кнопка добавки к продольнику-->
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="№ скв."/>
@@ -230,19 +233,33 @@
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="30"/>
-                                            <ColumnDefinition Width="50"/>                        <!--Номер скважины-->
-                                            <ColumnDefinition/>                                   <!--Высота устья скважины-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>  <!--X устья скважины-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>  <!--Y устья скважины-->
-                                            <ColumnDefinition/>                                   <!--Расстояние до следующей скважины-->
-                                            <ColumnDefinition/>                                   <!--Глубина скважины-->
-                                            <ColumnDefinition/>                                   <!--Разрушенные коренные породы-->
-                                            <ColumnDefinition/>                                   <!--Плотные коренные породы-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Торфа-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Мощность пласта-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Среднее содержание пласта-->
-                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>  <!--Вертикальный запас пласта-->
-                                            <ColumnDefinition Width="20"/>                        <!--Вертикальный запас пласта-->
+                                            <ColumnDefinition Width="50"/>
+                                            <!--Номер скважины-->
+                                            <ColumnDefinition/>
+                                            <!--Высота устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>
+                                            <!--X устья скважины-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Show}"/>
+                                            <!--Y устья скважины-->
+                                            <ColumnDefinition/>
+                                            <!--Расстояние до следующей скважины-->
+                                            <ColumnDefinition/>
+                                            <!--Глубина скважины-->
+                                            <ColumnDefinition/>
+                                            <!--Разрушенные коренные породы-->
+                                            <ColumnDefinition/>
+                                            <!--Плотные коренные породы-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                            <!--Торфа-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                            <!--Мощность пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                            <!--Среднее содержание пласта-->
+                                            <ColumnDefinition Style="{StaticResource 3d_Hide}"/>
+                                            <!--Вертикальный запас пласта-->
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="20"/>
+                                            <!--Вертикальный запас пласта-->
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2"
@@ -273,6 +290,8 @@
                                                 PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                         <Button Grid.Column="13" Content="о" Command="{Binding DataContext.AddWellToLongitudinalSection, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
+                                        <CheckBox Grid.Column="14" IsChecked="{Binding IsUnfinished, Mode=TwoWay}"
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -338,8 +357,7 @@
                                             </Grid.ColumnDefinitions>
                                             <Button Grid.Column="0" Content="-" Command="{Binding DataContext.DeleteGoldData, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                     CommandParameter="{Binding DataContext, RelativeSource={x:Static RelativeSource.Self}}" Style="{StaticResource Transparent}"/>
-                                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"
-                                                     PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
+                                            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding goldContent}" TextAlignment="Center"/>
                                             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding goldHeight}" TextAlignment="Center"
                                                      PreviewTextInput="NumberrTextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting"/>
                                         </Grid>
@@ -463,8 +481,8 @@
                     <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать" HorizontalAlignment="Left" Margin="300,0,0,0"
                     VerticalAlignment="Center" Height="35" Width="76" Command="{Binding DrawSegment}"
                     CommandParameter="{Binding ElementName=MainWindow}"/>
-                    
-                    
+
+
                     <Button Grid.Row="3" Grid.Column="1" Content="Отрисовать 3д" HorizontalAlignment="Left" Margin="144,0,0,0"
                         VerticalAlignment="Center" Height="35" Width="117" Command="{Binding DrawSegments3d}"
                         CommandParameter="{Binding ElementName=MainWindow}"/>
@@ -490,12 +508,15 @@
                     <GroupBox Grid.Row="0" Grid.Column="0" Header="Настройки скважин">
                         <StackPanel>
                             <TextBlock Text="Количество интерполируемых точек в кривых" Style="{StaticResource  SettingsTextBlock}"/>
-                            <TextBox Text="{Binding InterpolatedPointsNumber, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                            <TextBox Text="{Binding InterpolatedPointsNumber, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"
+                                     ToolTip="Количество точек сплайна между двумя соседними скважинами"/>
                             <TextBlock Text="Расстояние штриховки разрушенных пород" Style="{StaticResource  SettingsTextBlock}"/>
-                            <TextBox Text="{Binding SolidEarthHatchDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                            <TextBox Text="{Binding SolidEarthHatchDist, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"
+                                     ToolTip="Расстояние вниз, на которое штрихуются плотные коренные породы"/>
                             <CheckBox Content="Добавить отсутствующие точки коренных пород" x:Name="AddHardEarth_CheckBox"
                                       IsChecked="{Binding AddHardEarth, Source={x:Static properties:Settings.Default}}"  
-                                      Style="{StaticResource  SettingsTextBox}" VerticalContentAlignment="Center"/>
+                                      Style="{StaticResource  SettingsTextBox}" VerticalContentAlignment="Center"
+                                      ToolTip="При отсутствии данных о коренных породах дорисовывает разрушенные и плотные корренные породы."/>
                             <GroupBox IsEnabled="{Binding IsChecked, ElementName=AddHardEarth_CheckBox}">
                                 <StackPanel>
                                     <TextBlock Text="Расстояние от почвы скважины до новой точки" Style="{StaticResource  SettingsTextBlock}"/>
@@ -526,6 +547,18 @@
                                     IsChecked="{Binding IsGoldBlock3dNeeded, Source={x:Static properties:Settings.Default}}"/>
                             <CheckBox Content="Отрисовка коренных пород" Style="{StaticResource  SettingsTextBlock}" 
                                     IsChecked="{Binding IsHardEarth3dNeeded, Source={x:Static properties:Settings.Default}}"/>
+
+
+                            <CheckBox Content="Отстроить изолинии" x:Name="Isolines_CheckBox"
+                                IsChecked="{Binding IsIsolinesNeeded, Source={x:Static properties:Settings.Default}}"  
+                                Style="{StaticResource  SettingsTextBox}" VerticalContentAlignment="Center"
+                                ToolTip="Отстраивает изолинии на 3D-поверхностях блока, коренных пород, земной поверхности."/>
+                            <GroupBox IsEnabled="{Binding IsChecked, ElementName=Isolines_CheckBox}">
+                                <StackPanel>
+                                    <TextBlock Text="Расстояние от почвы скважины до новой точки" Style="{StaticResource  SettingsTextBlock}"/>
+                                    <TextBox Text="{Binding IsolineStep, Source={x:Static properties:Settings.Default}}" Style="{StaticResource  SettingsTextBox}"/>
+                                </StackPanel>
+                            </GroupBox>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Grid.Column="0" Header="Настройки неопределенные">
@@ -564,8 +597,9 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Left" Margin="309,5,0,0" Grid.Row="2" VerticalAlignment="Top" Command="{Binding SaveSettings}"/>
-
+                    <Grid Grid.Row="2" Grid.ColumnSpan="3">
+                        <Button Content="Сохранить" HorizontalAlignment="Left" Margin="1041,0,0,0" VerticalAlignment="Center" Command="{Binding SaveSettings}"/>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

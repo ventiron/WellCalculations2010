@@ -8,12 +8,6 @@ namespace WellCalculations2010.AutoCAD
 {
     internal class AutoCADTextFormatter
     {
-        public static string ApplyAutoCADFont(string text)
-        {
-
-            string fontChange = "{\\fTimes new Roman|b0|i0|c204|p18;";
-            return fontChange + text + "}";
-        }
 
         public static void FormatSectionStrings(Section section)
         {

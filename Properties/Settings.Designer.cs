@@ -346,5 +346,41 @@ namespace WellCalculations2010.Properties {
                 this["IsMode3d"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LicenseTest {
+            get {
+                return ((string)(this["LicenseTest"]));
+            }
+            set {
+                this["LicenseTest"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double IsolineStep {
+            get {
+                return ((double)(this["IsolineStep"]));
+            }
+            set {
+                this["IsolineStep"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsIsolinesNeeded {
+            get {
+                return ((bool)(this["IsIsolinesNeeded"]));
+            }
+            set {
+                this["IsIsolinesNeeded"] = value;
+            }
+        }
     }
 }

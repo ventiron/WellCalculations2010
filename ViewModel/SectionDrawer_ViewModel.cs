@@ -16,7 +16,6 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Xml.Serialization;
 using ClosedXML.Excel;
-using WellCalculations2010.Excel;
 using MathModule.Primitives;
 
 namespace WellCalculations2010.ViewModel
@@ -142,6 +141,25 @@ namespace WellCalculations2010.ViewModel
         //Функции добавления скважин, содержаний, пород.
 
         #region [Add commands]
+        private SimpleCommand addSection;
+        public SimpleCommand AddSection
+        {
+            get
+            {
+                return addSection == null ?
+                    (addSection = new SimpleCommand(obj =>
+                    {
+                        if (Sections.Count == 0)
+                        {
+                            Sections.Add(new Section());
+                            return;
+                        }
+                        Sections.Insert(Sections.IndexOf(SelectedSection) + 1, new Section());
+
+                    })) : addSection;
+            }
+        }
+
         private SimpleCommand addWell;
         public SimpleCommand AddWell
         {
@@ -336,15 +354,15 @@ namespace WellCalculations2010.ViewModel
 
 
 
-                            OpenFileDialog fileDialog = new OpenFileDialog();
-                            fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
-                            fileDialog.CheckFileExists = false;
-                            fileDialog.CheckPathExists = true;
-                            if (fileDialog.ShowDialog() == true)
-                            {
-                                SelectedSection.SaveSection(fileDialog.FileName);
+                            //OpenFileDialog fileDialog = new OpenFileDialog();
+                            //fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                            //fileDialog.CheckFileExists = false;
+                            //fileDialog.CheckPathExists = true;
+                            //if (fileDialog.ShowDialog() == true)
+                            //{
+                                SelectedSection.SaveSection();
                                 OnPropertyChanged("FileName");
-                            }
+                            //}
                         }
                         catch (Exception ex)
                         {
@@ -368,16 +386,16 @@ namespace WellCalculations2010.ViewModel
                     {
                         
 
-                        OpenFileDialog fileDialog = new OpenFileDialog();
-                        fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
-                        fileDialog.CheckFileExists = false;
-                        fileDialog.CheckPathExists = true;
-                        if (fileDialog.ShowDialog() == true)
-                        {
-                            Section section = Section.LoadSection(fileDialog.FileName);
+                        //OpenFileDialog fileDialog = new OpenFileDialog();
+                        //fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
+                        //fileDialog.CheckFileExists = false;
+                        //fileDialog.CheckPathExists = true;
+                        //if (fileDialog.ShowDialog() == true)
+                        //{
+                            Section section = Section.LoadSection();
                             Sections.Add(section);
                             SelectedSection = section;
-                        }
+                        //}
                     }
                     catch (Exception ex)
                     {
@@ -387,8 +405,6 @@ namespace WellCalculations2010.ViewModel
                 })) : loadSegment;
             }
         }
-
-
         private SimpleCommand drawSegment;
         public SimpleCommand DrawSegment
         {
@@ -454,6 +470,7 @@ namespace WellCalculations2010.ViewModel
             }
         }
 
+
         private SimpleCommand addWellToLongitudinalSection;
         public SimpleCommand AddWellToLongitudinalSection
         {
@@ -470,7 +487,7 @@ namespace WellCalculations2010.ViewModel
                     {
                         Well prewWell = LongitudinalSection[0].Wells[LongitudinalSection[0].Wells.Count - 1];
                         MathVector3d vector = new MathVector3d(prewWell.WellHeadPoint, wellClone.WellHeadPoint);
-                        prewWell.DistanceToNextWell = vector.Dist2d;
+                        prewWell.DistanceToNextWell = Math.Round(vector.Dist2d,4);
                     }
                     LongitudinalSection[0].Wells.Add(wellClone);
                 })) : addWellToLongitudinalSection;

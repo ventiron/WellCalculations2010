@@ -20,15 +20,13 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Point = WellCalculations2010.Model.Point;
 using WellCalculations2010.Properties;
 using System.Diagnostics;
+using AutoCADUtilities2010.Text;
+using MathModule;
 
 namespace WellCalculations2010.AutoCAD
 {
     internal class SectionDrawer3d
     {
-
-
-
-
         public static void DrawSectionModel(List<Section> sections)
         {
             using (Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -184,7 +182,7 @@ namespace WellCalculations2010.AutoCAD
 
                         //Отрисовываем надпись высоты нижней риски содержания
                         MText bottomText = AutoInitial.CreateMtext(
-                            AutoCADTextFormatter.ApplyAutoCADFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.', ',')}"),
+                            FontFormatter.ApplyTimesNewRomanFont($"{well.GoldDatas[j].goldHeight.ToString("0.0").Replace('.', ',')}"),
                             new Point3d(heightTextX, heightTextY, bottomHeight),
                             textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight);
 
@@ -209,7 +207,7 @@ namespace WellCalculations2010.AutoCAD
 
                             //Отрисовываем надпись высоты верхней риски содержания
                             MText topText = AutoInitial.CreateMtext(
-                                AutoCADTextFormatter.ApplyAutoCADFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
+                                FontFormatter.ApplyTimesNewRomanFont($"{(well.GoldDatas[j].goldHeight - 0.5d).ToString("0.0").Replace('.', ',')}"),
                                 new Point3d(heightTextX, heightTextY, topHeight),
                                 textHeight: goldContentDepthTextHeight, atPoint: AttachmentPoint.MiddleRight);
 
@@ -224,7 +222,7 @@ namespace WellCalculations2010.AutoCAD
                         }
 
                         //Отрисовываем само содержание
-                        MText contentText = AutoInitial.CreateMtext(AutoCADTextFormatter.ApplyAutoCADFont($"{well.GoldDatas[j].goldContent}"),
+                        MText contentText = AutoInitial.CreateMtext(FontFormatter.ApplyTimesNewRomanFont($"{well.GoldDatas[j].goldContent}"),
                             new Point3d(contentTextX, contentTextY, bottomHeight + (topHeight - bottomHeight) / 2),
                             textHeight: goldContentTextHeight, atPoint: AttachmentPoint.MiddleLeft);
 
@@ -439,13 +437,6 @@ namespace WellCalculations2010.AutoCAD
 
 
 
-
-
-
-
-
-
-
         private static void AddPointWithExtrapolation3d(Point3dCollection points, Well well, double Z, Section section, int counter)
         {
             if (points.Count == 0)
@@ -497,11 +488,6 @@ namespace WellCalculations2010.AutoCAD
         }
 
 
-
-
-
-
-
         private static List<Point3d> InterpolateBetweenPoints(Point3d firstPoint, Point3d secondPoint, int numberOfPoints)
         {
             List<Point3d> result = new List<Point3d>();
@@ -529,15 +515,14 @@ namespace WellCalculations2010.AutoCAD
             points.Add(point);
         }
 
-
-
-
         private static void DrawMeshFromSectionPoints(List<Point3dCollection> lines)
         {
+            if(lines == null || lines.Count == 0) return;
+
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
 
-
+            
 
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
@@ -605,10 +590,89 @@ namespace WellCalculations2010.AutoCAD
                             }
                         }
                     }
+                    CreateIsolinesFromMesh(faceMesh);
                 }
                 tr.Commit();
             }
 
+        }
+
+        private static void CreateIsolinesFromMesh(PolyFaceMesh mesh)
+        {
+            Triangulation triangulation = new Triangulation();
+            triangulation.CreateTriangulation(mesh);
+
+            triangulation.CreateIsolines(Settings.Default.IsolineStep);
+
+            try
+            {
+                Document doc = Application.DocumentManager.MdiActiveDocument;
+                Database dat = doc.Database;
+
+                using (Transaction tr = doc.TransactionManager.StartTransaction())
+                {
+                    BlockTable bt = tr.GetObject(dat.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                    BlockTableRecord btr = tr.GetObject(dat.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+
+                    foreach (LinkedList<MathModule.Point> list in triangulation.innerIsolines)
+                    {
+                        if (list == null || list.Count == 0 || list.Count == 1)
+                        {
+                            continue;
+                        }
+                        Point3dCollection points = new Point3dCollection();
+                        foreach (MathModule.Point point in list)
+                        {
+                            if (points.Count == 0)
+                            {
+                                points.Add(MathPointToPoint3d(point));
+                                continue;
+                            }
+                        InterpolateAndAddPoint(points, MathPointToPoint3d(point));
+                        }
+                        InterpolateAndAddPoint(points, MathPointToPoint3d(list.First.Value));
+                        Spline spline = new Spline(points, 3, 0.0d);
+                        spline.ColorIndex = 3;
+
+                        AutoInitial.Initialize(tr, btr, spline);
+
+                    }
+
+                    foreach (LinkedList<MathModule.Point> list in triangulation.outerIsolines)
+                    {
+                        if (list == null || list.Count == 0 || list.Count == 1)
+                        {
+                            continue;
+                        }
+                        Point3dCollection points = new Point3dCollection();
+                        foreach (MathModule.Point point in list)
+                        {
+                            if (points.Count == 0)
+                            {
+                                points.Add(MathPointToPoint3d(point));
+                                continue;
+                            }
+
+                            InterpolateAndAddPoint(points, MathPointToPoint3d(point));
+                        }
+                        Spline spline = new Spline(points, 6, 0.0d);
+                        spline.ColorIndex = 3;
+                        AutoInitial.Initialize(tr, btr, spline);
+
+                    }
+                    tr.Commit();
+                }
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        private static Point3d MathPointToPoint3d(MathModule.Point point)
+        {
+            return new Point3d(point.X, point.Y, point.Z);
         }
 
 

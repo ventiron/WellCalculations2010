@@ -12,18 +12,24 @@ using System.ComponentModel;
 using System.Data.OleDb;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using WellCalculations2010.Excel;
+using WellCalculations2010.Licensing;
 using WellCalculations2010.Model;
+using WellCalculations2010.Properties;
 using WellCalculations2010.View;
+
+using Excel = Microsoft.Office.Interop.Excel;
 
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Section = WellCalculations2010.Model.Section;
+using Exception = System.Exception;
+using DocumentFormat.OpenXml.Drawing.Charts;
 
 namespace WellCalculations2010.AutoCAD
 {
@@ -31,12 +37,162 @@ namespace WellCalculations2010.AutoCAD
     {
         private static SectionDrawer_Window _SectionDrawer_Window;
         private static WellPlanarImport_Window _WellPlanarImport_Window;
+        private static Licensing.LicenseManager licenseManager = new Licensing.LicenseManager();
+
+        private void GridStuff()
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Database bd = doc.Database;
+
+            using (Transaction tr = bd.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForRead) as BlockTable;
+                BlockTableRecord btr = tr.GetObject(bd.CurrentSpaceId, OpenMode.ForWrite) as BlockTableRecord;
+
+                ViewportTableRecord viewport = tr.GetObject(doc.Editor.ActiveViewportId, OpenMode.ForWrite) as ViewportTableRecord;
+                viewport.SnapEnabled = true;
+                viewport.SnapIncrements = new Point2d(1000, 1000);
+
+                doc.Editor.UpdateTiledViewportsFromDatabase();
+
+                tr.Commit();
+            }
+
+        }
+
+
+        [CommandMethod("Test")]
+        public void Test()
+        {
+
+
+
+
+
+
+
+
+            GridStuff();
+
+
+
+
+
+
+            //string text = "";
+            //text += "Availability: " + MotherboardInfo.Availability;
+            //text += "\nHostingBoard: " + MotherboardInfo.HostingBoard;
+            //text += "\nInstallDate: " + MotherboardInfo.InstallDate;
+            //text += "\nManufacturer: " + MotherboardInfo.Manufacturer;
+            //text += "\nModel: " + MotherboardInfo.Model;
+            //text += "\nPartNumber: " + MotherboardInfo.PartNumber;
+            //text += "\nPNPDeviceID: " + MotherboardInfo.PNPDeviceID;
+            //text += "\nPrimaryBusType: " + MotherboardInfo.PrimaryBusType;
+            //text += "\nProduct: " + MotherboardInfo.Product;
+            //text += "\nRemovable: " + MotherboardInfo.Removable;
+            //text += "\nReplaceable: " + MotherboardInfo.Replaceable;
+            //text += "\nRevisionNumber: " + MotherboardInfo.RevisionNumber;
+            //text += "\nSecondaryBusType: " + MotherboardInfo.SecondaryBusType;
+            //text += "\nSerialNumber: " + MotherboardInfo.SerialNumber;
+            //text += "\nStatus: " + MotherboardInfo.Status;
+            //text += "\nSystemName: " + MotherboardInfo.SystemName;
+            //text += "\nVersion: " + MotherboardInfo.Version;
+            //text += "\n";
+            //text += "\n";
+            //text += "\n";
+            //text += "\n" + Settings.Default.LicenseTest == "" ? "" : StringCipherer.Decrypt(Settings.Default.LicenseTest, MotherboardInfo.SerialNumber);
+            //Settings.Default.LicenseTest = StringCipherer.Encrypt(MotherboardInfo.SerialNumber, MotherboardInfo.SerialNumber);
+
+            //text += Settings.Default.LicenseTest;
+            //text += "\n" + StringCipherer.Decrypt(Settings.Default.LicenseTest, MotherboardInfo.SerialNumber);
+
+            //Settings.Default.Save();
+            //MessageBox.Show(text);
+
+
+
+
+
+
+
+
+
+            //Excel.Application oXL;
+            //Excel._Workbook oWB;
+            //Excel._Worksheet oSheet;
+            //Excel.Range oRng;
+            //Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+
+            //try
+            //{
+            //    //Start Excel and get Application object.
+            //    oXL = new Excel.Application();
+            //    oXL.Visible = true;
+            //    oXL.UserControl = false;
+
+            //    //Get a new workbook.
+            //    oWB = (Excel._Workbook)(oXL.Workbooks.Add(Missing.Value));
+            //    oSheet = (Excel._Worksheet)oWB.ActiveSheet;
+
+            //    //Add table headers going cell by cell.
+            //    oSheet.Cells[1, 1] = "№";
+            //    oSheet.Cells[1, 2] = "X";
+            //    oSheet.Cells[1, 3] = "Y";
+            //    oSheet.Cells[1, 4] = "Z";
+            //    oSheet.Cells[1, 6] = "Площадь";
+
+                
+
+
+            //    PromptPointOptions ppo = new PromptPointOptions("\nВыберите точку");
+            //    ppo.AllowNone = true;
+            //    PromptPointResult ppr;
+
+            //    int pointCount = 0;
+
+            //    do
+            //    {
+            //        ppr = ed.GetPoint(ppo);
+            //        Point3d basePoint = ppr.Value;
+
+            //        if (ppr.Status == PromptStatus.OK)
+            //        {
+            //            oSheet.Cells[2 + pointCount, 6] = "=СУММ(R[-1]C[-3]:RC[-1])";
+            //            oSheet.Cells[2 + pointCount, 1] = pointCount + 1;
+            //            oSheet.Cells[2 + pointCount, 2] = basePoint.X;
+            //            oSheet.Cells[2 + pointCount, 3] = basePoint.Y;
+            //            oSheet.Cells[2 + pointCount, 4] = basePoint.Z;
+            //            oSheet.Cells[2 + pointCount, 5] = oSheet.Cells[2 + pointCount, 5];
+            //            pointCount++;
+            //        }
+
+            //    } while (ppr.Status == PromptStatus.OK);
+
+
+
+            //    //Make sure Excel is visible and give the user control
+            //    //of Microsoft Excel's lifetime.
+            //    oXL.Visible = true;
+            //    oXL.UserControl = true;
+            //}
+            //catch (Exception theException)
+            //{
+            //    String errorMessage;
+            //    errorMessage = "Error: ";
+            //    errorMessage = String.Concat(errorMessage, theException.Message);
+            //    errorMessage = String.Concat(errorMessage, " Line: ");
+            //    errorMessage = String.Concat(errorMessage, theException.Source);
+
+            //    MessageBox.Show(errorMessage, "Error");
+            //}
+        }
 
         
 
         [CommandMethod("РРР")]
         public void DrawSection_Command()
         {
+            licenseManager.CheckAndCreateKeyInRegistry();
             if(_SectionDrawer_Window == null || !_SectionDrawer_Window.IsLoaded)
                 _SectionDrawer_Window = new SectionDrawer_Window();
             if (_SectionDrawer_Window.IsLoaded && _SectionDrawer_Window.WindowState == System.Windows.WindowState.Minimized)
@@ -90,20 +246,7 @@ namespace WellCalculations2010.AutoCAD
             }
         }
 
-        [CommandMethod("Тест")]
-        public void Test()
-        {
 
-            try
-            {
-                TestClass.testSave();
-            }
-            catch (System.Exception ex)
-            {
-
-                MessageBox.Show(ex.ToString());
-            }
-        }
 
 
         private static readonly string TabName = "InenTironAddin";

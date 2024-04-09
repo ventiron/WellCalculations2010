@@ -73,6 +73,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -91,8 +92,13 @@
     <Compile Include="Converter\IsOddConverter.cs" />
     <Compile Include="Converter\PlusOneConverter.cs" />
     <Compile Include="Converter\RowNumberConverter.cs" />
-    <Compile Include="Excel\TestClass.cs" />
+    <Compile Include="ExcelInter\ExcelTool.cs" />
+    <Compile Include="ExcelInter\TestClass.cs" />
     <Compile Include="FileManager\FileManager.cs" />
+    <Compile Include="Licensing\StringCipherer.cs" />
+    <Compile Include="Licensing\LicenseKey.cs" />
+    <Compile Include="Licensing\LicenseManager.cs" />
+    <Compile Include="Licensing\MotherboardInfo.cs" />
     <Compile Include="Model\EarthData.cs" />
     <Compile Include="Model\GoldData.cs" />
     <Compile Include="Model\GoldLayer.cs" />

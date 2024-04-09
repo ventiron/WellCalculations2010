@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using WellCalculations2010.ViewModel;
 
 
@@ -31,6 +32,7 @@ namespace WellCalculations2010.Model
             GoldLayerThickness = "";
             GoldLayerContentSlip = "";
             VerticalGoldContent = "";
+            IsUnfinished = false;
         }
 
         public ObservableCollection<GoldData> GoldDatas { get; set; }
@@ -59,6 +61,9 @@ namespace WellCalculations2010.Model
         public string GoldLayerContentSlip { get; set; }
         public string VerticalGoldContent { get; set; }
 
+        [XmlIgnore]
+        public bool IsUnfinished { get; set; }
+
         public object Clone()
         {
             Well clone = new Well();
@@ -72,6 +77,7 @@ namespace WellCalculations2010.Model
             clone.GoldLayerThickness = this.GoldLayerThickness.ToString();
             clone.GoldLayerContentSlip = this.GoldLayerContentSlip.ToString();
             clone.VerticalGoldContent = this.VerticalGoldContent.ToString();
+            clone.IsUnfinished = this.IsUnfinished;
 
             ObservableCollection<GoldData> goldDatas = new ObservableCollection<GoldData>();
             ObservableCollection<EarthData> earthDatas = new ObservableCollection<EarthData>();
