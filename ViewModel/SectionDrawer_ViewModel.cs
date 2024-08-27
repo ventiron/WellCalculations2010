@@ -384,7 +384,7 @@ namespace WellCalculations2010.ViewModel
                 {
                     try
                     {
-                        
+
 
                         //OpenFileDialog fileDialog = new OpenFileDialog();
                         //fileDialog.Filter = "Файл сохранения (.xml)|*.xml";
@@ -392,6 +392,8 @@ namespace WellCalculations2010.ViewModel
                         //fileDialog.CheckPathExists = true;
                         //if (fileDialog.ShowDialog() == true)
                         //{
+
+                        string a = "kljaf";
                             Section section = Section.LoadSection();
                             Sections.Add(section);
                             SelectedSection = section;
