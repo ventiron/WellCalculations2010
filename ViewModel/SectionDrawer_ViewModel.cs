@@ -413,11 +413,18 @@ namespace WellCalculations2010.ViewModel
                 return drawSegment == null ?
                     (drawSegment = new SimpleCommand(obj =>
                     {
+                        try
+                        {
 
-                        ((Window)obj).WindowState = WindowState.Minimized;
-                        SectionDrawer2d.DrawSection((Section)SelectedSection.Clone());
-                        return;
-
+                            ((Window)obj).WindowState = WindowState.Minimized;
+                            SectionDrawer2d.DrawSection((Section)SelectedSection.Clone());
+                            return;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                            return;
+                        }
 
                     })) : drawSegment;
             }

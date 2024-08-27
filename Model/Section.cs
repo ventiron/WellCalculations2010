@@ -24,6 +24,7 @@ namespace WellCalculations2010.Model
             VerticalScale = "1:100";
             Wells = new ObservableCollection<Well>();
             FileName = "Новый.xml";
+            IsSaved = false;
         }
 
         public Section(ObservableCollection<Well> Wells)
@@ -48,6 +49,7 @@ namespace WellCalculations2010.Model
                 OnPropertyChanged(nameof(FileName));
             }
         }
+        public bool IsSaved { get; set; }
 
         public static Section LoadSection(string path="")
         {
@@ -86,6 +88,7 @@ namespace WellCalculations2010.Model
                     Section result = (Section)xmlSerializer.Deserialize(fs);
                     result.FileName = new FileInfo(path).Name;
 
+                    result.IsSaved = true;
                     return result;
                 }
             }
@@ -149,6 +152,7 @@ namespace WellCalculations2010.Model
             clone.HorizontalScale = HorizontalScale.ToString();
             clone.VerticalScale = VerticalScale.ToString();
             clone.FileName = FileName.ToString();
+            clone.IsSaved = IsSaved;
             return clone;
         }
     }
